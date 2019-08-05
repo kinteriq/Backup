@@ -28,7 +28,6 @@ class TestShortcuts(unittest.TestCase):
             'to/paths']
         )
         result = self.shortcuts.show([shortcut])
-        expected_result = [
-            f'{shortcut}:\n' + str(self.shortcuts.data[shortcut])
-        ]
+        expected_result = f'{shortcut}:\n' + str(self.shortcuts.data[shortcut])
+        
         self.assertEqual(result, expected_result)

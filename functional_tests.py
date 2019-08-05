@@ -58,15 +58,13 @@ class TestCommandLine(unittest.TestCase):
         shortcut = CREATE_ARGS[2]
         path_from = CREATE_ARGS[3]
         paths_to = CREATE_ARGS[4:]
-        expected_result = [
-            f'{shortcut}:\n' +
-                str(
+        expected_result = f'{shortcut}:\n' +\
+            str(
                 {
                     'original': path_from,
                     'destination': paths_to
                 }
             )
-        ]
         self.assertEqual(result, expected_result)
 
 

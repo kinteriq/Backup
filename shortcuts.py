@@ -12,8 +12,8 @@ class Shortcuts():
         }
         return f'Shortcut is created: "{shortcut}".'
 
-    def show(self, shortcuts: list):
+    def show(self, shortcuts: list) -> str:
         output = []
         for shortcut in shortcuts:
             output.append(shortcut + ':\n' + str(self.data[shortcut]))
-        return output
+        return ''.join(output)

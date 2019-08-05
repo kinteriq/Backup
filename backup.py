@@ -6,6 +6,5 @@ def main():
     result = execute_command(command_line)
 
 
-
 if __name__ == '__main__':
     main()
