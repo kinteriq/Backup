@@ -10,11 +10,25 @@ class TestShortcuts(unittest.TestCase):
     def test_shortcut_is_created(self):
         shortcut = 'test'
         result = self.shortcuts.create(
-            shortcut=shortcut,
-            path_from='from/path',
-            path_to=set(('to/path',))
+        [shortcut,
+        'from/path',
+        'to/paths']
         )
 
-        expected_result = f'"{shortcut}" shortcut is created.'
+        expected_result = f'Shortcut is created: "{shortcut}".'
         self.assertIn(shortcut, self.shortcuts.data)
+        self.assertEqual(result, expected_result)
+
+    def test_show_shortcut(self):
+        shortcut = 'test'
+
+        self.shortcuts.create(
+            [shortcut,
+            'from/path',
+            'to/paths']
+        )
+        result = self.shortcuts.show([shortcut])
+        expected_result = [
+            f'{shortcut}:\n' + str(self.shortcuts.data[shortcut])
+        ]
         self.assertEqual(result, expected_result)

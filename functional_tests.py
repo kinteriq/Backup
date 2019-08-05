@@ -5,32 +5,69 @@ from unittest.mock import patch
 from backup import receive_command, execute_command
 
 
+CREATE_ARGS = [
+    'backup.py',
+    'create',
+    'test',
+    'path/from',
+    'path/to_1',
+    'path/to_2'
+]
+
+SHOW_ARGS = [
+    'backup.py',
+    'show',
+    'test'
+]
+
+
+def receive_cmd(test_args):
+    with patch.object(sys, 'argv', test_args):
+        command_line = receive_command()
+    return command_line
+
+
 class TestCommandLine(unittest.TestCase):
+    '''
+    1. User creates "test" shortcut;
+    2. Checks "test" shortcut was saved;
+    3. ...
+    '''
     def setUp(self):
-        self.test_args = [
-            'backup.py',
-            'create',
-            'shortcut_name',
-            'path_from',
-            'path_to_1',
-            'path_to_2'
-        ]
-        self.paths_to = set(self.test_args[4:])
-        with patch.object(sys, 'argv', self.test_args):
-            self.command_line = receive_command()
+        # create a shortcut from command line
+        self.create_command = receive_cmd(CREATE_ARGS)
 
-    # enter 'create' command into command line
+    # program received 'create' command
     def test_receive_create_command(self):
-        should_receive = tuple(self.test_args[1:4] + [ self.paths_to ])
-        self.assertEqual(self.command_line, should_receive)
+        command, arguments = CREATE_ARGS[1], CREATE_ARGS[2:]
+        should_receive = tuple([command, arguments])
+        self.assertEqual(self.create_command, should_receive)
 
-    # see '"{name}" shortcut is created.' in the output
+    # see that shortcut was created from the output
     def test_command_is_executed_correctly(self):
-        shortcut = self.command_line[1]
-        result = execute_command(self.command_line)
-        expected_result = f'"{shortcut}" shortcut is created.'
+        result = execute_command(self.create_command)
+        shortcut = CREATE_ARGS[2]
+        expected_result = f'Shortcut is created: "{shortcut}".'
         self.assertEqual(result, expected_result)
 
+    # see the result of saving a shortcut by
+    # entering 'show test' in the command line
+    def test_receive_show_command(self):
+        show_command = receive_cmd(SHOW_ARGS)
+        result = execute_command(show_command)
+        shortcut = CREATE_ARGS[2]
+        path_from = CREATE_ARGS[3]
+        paths_to = CREATE_ARGS[4:]
+        expected_result = [
+            f'{shortcut}:\n' +
+                str(
+                {
+                    'original': path_from,
+                    'destination': paths_to
+                }
+            )
+        ]
+        self.assertEqual(result, expected_result)
 
 
 if __name__ == '__main__':
