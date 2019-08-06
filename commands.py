@@ -1,7 +1,7 @@
 import sys
 
+from file_handler import create_json, read_from
 from shortcuts import Shortcuts
-
 
 _ERROR_MESSAGE = {
     'wrong_command': 'There is no such command: ',
@@ -13,10 +13,18 @@ _AVAILABLE_COMMANDS = {
     'show': Shortcuts.show,
     'showall': None,
 }
-SHORTCUTS = Shortcuts()
+
+try:
+    DATA = read_from('shortcuts.json')
+except FileNotFoundError as exc:
+    DATA = create_json('shortcuts.json')
 
 
 def receive_command() -> tuple:
+    if sys.argv[1] in DATA:
+        shortcut = sys.argv[1]
+        return shortcut,
+
     command = sys.argv[1]
     if command not in _AVAILABLE_COMMANDS:
         print(_ERROR_MESSAGE['wrong_command'], command)
@@ -28,10 +36,7 @@ def receive_command() -> tuple:
 
 def execute_command(command_line: tuple) -> str:
     command, arguments = command_line
-    output_result = _AVAILABLE_COMMANDS[command](
-        SHORTCUTS,
-        arguments
-    )
+    output_result = _AVAILABLE_COMMANDS[command](Shortcuts(DATA), arguments)
     return output_result
 
 

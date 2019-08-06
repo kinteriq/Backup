@@ -1,6 +1,6 @@
 class Shortcuts():
-    def __init__(self):
-        self.data = dict()
+    def __init__(self, data):
+        self.data = data
 
     def create(self, arguments: list) -> str:
         shortcut, path_from, *paths_to = arguments
@@ -23,10 +23,7 @@ class Shortcuts():
             print(f'Updating "{shortcut}"')
             source = input('Source: ["enter" to skip]\n')
             destination = input('Destination: ["enter" to skip]\n')
-            changed = {
-                'source': source,
-                'destination': destination
-            }
+            changed = {'source': source, 'destination': destination}
             for field in changed:
                 if not changed[field]:
                     continue
