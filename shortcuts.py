@@ -7,7 +7,7 @@ class Shortcuts():
         if shortcut in self.data:
             return f'Shortcut exists: "{shortcut}"'
         self.data[shortcut] = {
-            'original': path_from,
+            'source': path_from,
             'destination': paths_to,
         }
         return f'Shortcut is created: "{shortcut}".'
@@ -17,3 +17,19 @@ class Shortcuts():
         for shortcut in shortcuts:
             output.append(shortcut + ':\n' + str(self.data[shortcut]))
         return ''.join(output)
+
+    def update(self, shortcuts: list) -> str:
+        for shortcut in shortcuts:
+            print(f'Updating "{shortcut}"')
+            source = input('Source: ["enter" to skip]\n')
+            destination = input('Destination: ["enter" to skip]\n')
+            changed = {
+                'source': source,
+                'destination': destination
+            }
+            for field in changed:
+                if not changed[field]:
+                    continue
+                self.data[shortcut][field] = changed[field]
+
+        return 'Updated successfully.'

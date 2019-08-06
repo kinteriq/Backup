@@ -34,13 +34,13 @@ def receive_cmd(test_args):
 
 
 class TestCommandLine(unittest.TestCase):
-    '''
+    """
     1. User creates a shortcut;
     2. Checks that the shortcut was saved;
     3. Sees that the source path is wrong;
        Changes the source path.
     4. ...
-    '''
+    """
     def setUp(self):
         # create a shortcut from command line
         self.create_command = receive_cmd(CREATE_ARGS)
