@@ -19,9 +19,9 @@ Makes day-to-day backups easier.
 #### Commands:
 Command                                  | Description
 -----------------------------------------|------------------------------------
-*Shortcut*                               | backup
-create *Shortcut* *From_path* *To_paths* | add *Shortcut* to the database
-delete *Shortcuts*                       | delete *Shortcuts* from the database
-update *Shortcuts*                       | change *Shortcuts*' info in the database
-show *Shortcuts*                         | fetch *Shortcuts*' information
-showall                                  | fetch *Shortcuts* from the databases
+**shortcut**                             | backup
+create **shortcut from_path to_paths**   | add **shortcut** to the database
+delete **shortcuts**                     | delete **shortcuts** from the database
+update **shortcuts**                     | change **shortcuts**' info in the database
+show **shortcuts**                       | fetch **shortcuts**' information
+showall                                  | fetch **shortcuts** from the database
