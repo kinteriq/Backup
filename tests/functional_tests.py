@@ -3,8 +3,8 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from file_handler import create_json, read_from
-from backup import receive_command, execute_command
+from backup.file_handler import create_json, read_from
+from backup.backup import receive_command, execute_command
 
 
 CREATE_ARGS= [
@@ -34,9 +34,10 @@ class TestCommandLine(unittest.TestCase):
     5. ...
     """
     def setUp(self):
+        self.data = open('shortcuts_test.json', 'r')
         # create a shortcut from command line
-        self.data = create_json('shortcuts_test.json')
         self.create_cmd = receive_cmd(CREATE_ARGS, data=self.data)
+        self.created = execute_command(self.create_cmd)
 
     def tearDown(self):
         os.remove('shortcuts_test.json')
@@ -49,15 +50,13 @@ class TestCommandLine(unittest.TestCase):
 
     # see the output that the shortcut was created
     def test_create_command_is_executed_correctly(self):
-        result = execute_command(self.create_cmd)
         shortcut = CREATE_ARGS[2]
         expected_result = f'Shortcut is created: "{shortcut}".'
-        self.assertEqual(result, expected_result)
+        self.assertEqual(self.created , expected_result)
 
     # see the result of saving the shortcut by
     # entering 'show' in the command line
     def test_receive_show_command(self):
-        execute_command(self.create_cmd)
         show_cmd = receive_cmd(SHOW_ARGS, data=self.data)
         result = execute_command(show_cmd)
         shortcut = CREATE_ARGS[2]
@@ -77,14 +76,13 @@ class TestCommandLine(unittest.TestCase):
 
     @patch('builtins.input', side_effect=user_input)
     def test_receive_update_command(self, user_input):
-        execute_command(self.create_cmd)
         update_cmd = receive_cmd(UPDATE_ARGS, data=self.data)
         result = execute_command(update_cmd)
         expected_result = 'Updated successfully.'
         self.assertEqual(result, expected_result)
 
+    # does a backup
     def test_backup(self):
-        execute_command(self.create_cmd)
         shortcut = CREATE_ARGS[2]
         backup_cmd = receive_cmd(BACKUP_ARGS, data=self.data)
         result = execute_command(backup_cmd)
