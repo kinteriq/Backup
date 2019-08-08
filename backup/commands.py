@@ -17,35 +17,37 @@
 
 import sys
 
+from shortcuts import Shortcuts as shortcuts
 import error
 
 _COMMANDS = {
-    'create': None,
+    'create': shortcuts.create,
     'update': None,
     'delete': None,
     'show': None,
     'showall': None,
 }
+temp = shortcuts({})
 
 
 def execute_command() -> str:
-    args = sys.argv[1:]
-    try:
-        is_command(args)
-    except error.NoArgs as e:
-        sys.exit(e)
-    except error.InvalidCommand as e:
-        sys.exit(e)
-    except SystemExit:
-        sys.exit('FINISH')
+    args = sys.argv[1:]         # exclude 'backup.py'
+    _is_command(args)
     command, params = args[0], args[1:]
-    output = _COMMANDS[command](params)
+    output = _COMMANDS[command](temp, arguments=params)
     return output
 
 
-def is_command(args):
+def _is_command(args):
     for check in [_empty, _shortcut_name, _invalid_command]:
-        check(args)
+        try:
+            check(args)
+        except error.NoArgs as e:
+            sys.exit(e)
+        except error.InvalidCommand as e:
+            sys.exit(e)
+        except SystemExit:
+            sys.exit('FINISH')
     return True
 
 
