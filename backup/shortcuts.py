@@ -19,13 +19,13 @@ class Shortcuts():
     def __init__(self, data):
         self.data = data
 
-    def create(self, arguments: list) -> str:
-        shortcut, path_from, *paths_to = arguments
+    def create(self, arguments) -> str:
+        shortcut, source, *destination = arguments
         if shortcut in self.data:
             return f'Shortcut exists: "{shortcut}"'
         self.data[shortcut] = {
-            'source': path_from,
-            'destination': paths_to,
+            'source': source,
+            'destination': destination,
         }
         return f'Shortcut is created: "{shortcut}".'
 
