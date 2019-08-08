@@ -17,11 +17,11 @@ Makes day-to-day backups easier.
 
 
 #### Commands:
-Command                                  | Description
------------------------------------------|------------------------------------
-**shortcut**                             | backup
-create **shortcut from_path to_paths**   | add **shortcut** to the database
-delete **shortcuts**                     | delete **shortcuts** from the database
-update **shortcuts**                     | change **shortcuts**' info in the database
-show **shortcuts**                       | fetch **shortcuts**' information
-showall                                  | fetch **shortcuts** from the database
+Command                                     | Description
+--------------------------------------------|------------------------------------
+*SHORTCUT_NAME*                             | backup
+create *SHORTCUT_NAME PATH_FROM PATH_TO*    | add *SHORTCUT* to the database
+delete *SHORTCUT_NAMEs*                     | delete *SHORTCUTs* from the database
+update *SHORTCUT_NAMEs*                     | change *SHORTCUTs*' paths
+show *SHORTCUT_NAMEs*                       | fetch *SHORTCUTs*' information
+showall                                     | fetch *SHORTCUT_NAMEs* from the database
