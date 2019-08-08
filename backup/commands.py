@@ -28,47 +28,43 @@ _COMMANDS = {
 }
 
 
-def check_args(args) -> bool:
-    if _empty(args):
-        print(error.NoArgs())
-        sys.exit()
+def execute_command() -> str:
+    args = sys.argv[1:]
+    try:
+        is_command(args)
+    except error.NoArgs as e:
+        sys.exit(e)
+    except error.InvalidCommand as e:
+        sys.exit(e)
+    except SystemExit:
+        sys.exit('FINISH')
+    command, params = args[0], args[1:]
+    output = _COMMANDS[command](params)
+    return output
 
-    if _shortcut_name(args):
-        run_backup(shortcut=args[0])
-        return False
 
-    if not _valid_command(args):
-        print(error.InvalidCommand())
-        sys.exit()
-
+def is_command(args):
+    for check in [_empty, _shortcut_name, _invalid_command]:
+        check(args)
     return True
 
 
-def execute_command() -> str:
-    args = sys.argv[1:]
-    if check_args(args):
-        command, params = args[0], args[1:]
-        output = _COMMANDS[command](params)
-        return output
+def _empty(args):
+    if not args:
+        raise error.NoArgs
+
+
+def _shortcut_name(args):
+    valid_name = args[0] in ['NAME']
+    if len(args) == 1 and valid_name:
+        run_backup(shortcut=args[0])
+        sys.exit()
 
 
 def run_backup(shortcut):
     pass
 
 
-def _empty(args) -> bool:
-    if not args:
-        return True
-    return False
-
-
-def _shortcut_name(args) -> bool:
-    if len(args) == 1 and args[0] in ['NAME']:
-        return True
-    return False
-
-
-def _valid_command(args) -> bool:
-    if args[0] in _COMMANDS:
-        return True
-    return False
+def _invalid_command(args):
+    if args[0] not in _COMMANDS:
+        raise error.InvalidCommand
