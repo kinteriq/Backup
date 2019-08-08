@@ -15,7 +15,8 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-class Error():
+
+class Error(Exception):
     def __init__(self, message):
         self.message = message
 
@@ -25,9 +26,9 @@ class Error():
 
 class InvalidCommand(Error):
     def __init__(self):
-        super().__init__(message='There is no such command')
+        super().__init__(message='There is no such command.')
 
 
 class NoArgs(Error):
     def __init__(self):
-        super().__init__(message='Zero arguments provided')
+        super().__init__(message='Zero arguments provided.')
