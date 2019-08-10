@@ -15,9 +15,8 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from commands import execute_command
 import file_handle
-
+from commands import execute_command
 
 DATA = file_handle.main('shortcuts.json')
 

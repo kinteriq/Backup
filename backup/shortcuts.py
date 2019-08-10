@@ -27,8 +27,8 @@ class Shortcuts():
         }
         return f'Shortcut is created: "{shortcut}".'
 
-    def update(data, shortcuts: list) -> str:
-        for shortcut in shortcuts:
+    def update(data, arguments) -> str:
+        for shortcut in arguments:
             print(f'Updating "{shortcut}"')
             source = input('Source: ["enter" to skip]\n')
             destination = input('Destination: ["enter" to skip]\n')
@@ -39,12 +39,12 @@ class Shortcuts():
                 data[shortcut][field] = changed[field]
         return 'Updated successfully.'
 
-    def delete(data, shortcuts: list) -> str:
+    def delete(data, arguments) -> str:
         pass
 
-    def show(data, shortcuts: list) -> str:
+    def show(data, arguments) -> str:
         output = []
-        for shortcut in shortcuts:
+        for shortcut in arguments:
             output.append(shortcut + ':\n' + str(data[shortcut]))
         return ''.join(output)
 

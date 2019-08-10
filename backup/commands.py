@@ -23,29 +23,25 @@ import error
 
 COMMANDS = {
     'create': Shortcuts.create,
-    'update': None,
+    'update': Shortcuts.update,
     'delete': None,
-    'show': None,
+    'show': Shortcuts.show,
     'showall': None,
 }
 
 
-def execute_command(datafile) -> str:
-    args = sys.argv[1:]         # exclude 'backup.py'
-    _is_command(args)
+def execute_command(datafile: dict) -> str:
+    args = sys.argv[1:]  # exclude 'backup.py'
+    is_command(args, datafile)
     command, params = args[0], args[1:]
     output = COMMANDS[command](datafile, arguments=params)
     return output
 
 
-def run_backup(shortcut):
-    pass
-
-
-def _is_command(args):
+def is_command(args, data):
     try:
         _is_empty(args)
-        _is_shortcut_name(args)
+        _is_shortcut_name(args, data)
         _is_invalid_command(args)
     except error.Empty as e:
         sys.exit(e)
@@ -61,11 +57,15 @@ def _is_empty(args):
         raise error.Empty
 
 
-def _is_shortcut_name(args):
-    valid_name = args[0] in ['NAME']
+def _is_shortcut_name(args, data):
+    valid_name = args[0] in data
     if len(args) == 1 and valid_name:
-        run_backup(shortcut=args[0])
+        _run_backup(shortcut=args[0])
         sys.exit()
+
+
+def _run_backup(shortcut):
+    pass
 
 
 def _is_invalid_command(args):
