@@ -17,56 +17,57 @@
 
 import sys
 
-from shortcuts import Shortcuts as shortcuts
+from shortcuts import Shortcuts as Shortcuts
 import error
 
-_COMMANDS = {
-    'create': shortcuts.create,
+
+COMMANDS = {
+    'create': Shortcuts.create,
     'update': None,
     'delete': None,
     'show': None,
     'showall': None,
 }
-temp = shortcuts({})
 
 
-def execute_command() -> str:
+def execute_command(datafile) -> str:
     args = sys.argv[1:]         # exclude 'backup.py'
     _is_command(args)
     command, params = args[0], args[1:]
-    output = _COMMANDS[command](temp, arguments=params)
+    output = COMMANDS[command](datafile, arguments=params)
     return output
-
-
-def _is_command(args):
-    for check in [_empty, _shortcut_name, _invalid_command]:
-        try:
-            check(args)
-        except error.NoArgs as e:
-            sys.exit(e)
-        except error.InvalidCommand as e:
-            sys.exit(e)
-        except SystemExit:
-            sys.exit('FINISH')
-    return True
-
-
-def _empty(args):
-    if not args:
-        raise error.NoArgs
-
-
-def _shortcut_name(args):
-    valid_name = args[0] in ['NAME']
-    if len(args) == 1 and valid_name:
-        run_backup(shortcut=args[0])
-        sys.exit()
 
 
 def run_backup(shortcut):
     pass
 
 
-def _invalid_command(args):
-    if args[0] not in _COMMANDS:
+def _is_command(args):
+    try:
+        _is_empty(args)
+        _is_shortcut_name(args)
+        _is_invalid_command(args)
+    except error.Empty as e:
+        sys.exit(e)
+    except error.InvalidCommand as e:
+        sys.exit(e)
+    except SystemExit:
+        sys.exit('BACKUP IS FINISHED')
+    return True
+
+
+def _is_empty(args):
+    if not args:
+        raise error.Empty
+
+
+def _is_shortcut_name(args):
+    valid_name = args[0] in ['NAME']
+    if len(args) == 1 and valid_name:
+        run_backup(shortcut=args[0])
+        sys.exit()
+
+
+def _is_invalid_command(args):
+    if args[0] not in COMMANDS:
         raise error.InvalidCommand
