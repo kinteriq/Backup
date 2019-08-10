@@ -25,30 +25,27 @@ COMMANDS = {
     'update': Shortcuts.update,
     'delete': Shortcuts.delete,
     'show': Shortcuts.show,
-    'showall': None,
+    'showall': Shortcuts.showall,
 }
 
 
-def execute_command(datafile: dict) -> str:
+def read_from_command_line(data: dict) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
-    is_command(args, datafile)
-    command, params = args[0], args[1:]
-    output = COMMANDS[command](datafile, arguments=params)
-    return output
-
-
-def is_command(args, data):
     try:
         _is_empty(args)
-        _is_shortcut_name(args, data)
+        _is_showall(data=data, args=args)
+        _is_shortcut_name(data=data, args=args)
         _is_invalid_command(args)
     except error.Empty as e:
         sys.exit(e)
     except error.InvalidCommand as e:
         sys.exit(e)
-    except SystemExit:
-        sys.exit('BACKUP IS FINISHED')
-    return True
+    return args
+
+
+def execute_command(data: dict, command, params) -> str:
+    output = COMMANDS[command](data=data, arguments=params)
+    return output
 
 
 def _is_empty(args):
@@ -56,11 +53,11 @@ def _is_empty(args):
         raise error.Empty
 
 
-def _is_shortcut_name(args, data):
+def _is_shortcut_name(data, args):
     valid_name = args[0] in data
     if len(args) == 1 and valid_name:
         _run_backup(shortcut=args[0])
-        sys.exit()
+        sys.exit('BACKUP IS FINISHED')
 
 
 def _run_backup(shortcut):
@@ -70,3 +67,9 @@ def _run_backup(shortcut):
 def _is_invalid_command(args):
     if args[0] not in COMMANDS:
         raise error.InvalidCommand
+
+
+def _is_showall(data, args):
+    if args[0] == 'showall':
+        all_shortcuts = COMMANDS['showall'](data)
+        sys.exit(all_shortcuts)

@@ -54,5 +54,6 @@ class Shortcuts():
             output.append(shortcut + ':\n' + str(data[shortcut]))
         return ''.join(output)
 
-    def showall(self) -> str:
-        pass
+    def showall(data) -> str:
+        all_shortcuts = data.keys()
+        return '\n'.join(all_shortcuts)
