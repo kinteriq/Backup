@@ -1,9 +1,11 @@
 import pytest
 import sys
 
+
 from .context import backup
 from backup.commands import _is_command, execute_command
 from backup.error import MSG as message
+from .fixtures import mock_data
 
 test_args_shortcut_name = ['NAME']
 test_args_valid_command = ['create', 'NAME', 'from/path', 'to/path']
@@ -26,11 +28,11 @@ class TestCheckArgs():
     def test_got_empty_line(self):
         with pytest.raises(SystemExit) as e:
             _is_command([])
-        assert message['no_args'] in e.exconly()
+        assert message['empty'] in e.exconly()
 
 
-def test_execute_create_command(monkeypatch):
+def test_execute_create_command(monkeypatch, mock_data):
     monkeypatch.setattr(
         sys, 'argv', ['backup.py', 'create', 'NAME', 'from/path', 'to/path'])
-    output = execute_command()
+    output = execute_command(mock_data)
     assert output == f'Shortcut is created: "NAME".'
