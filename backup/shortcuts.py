@@ -15,27 +15,19 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-class Shortcuts():
-    def __init__(self, data):
-        self.data = data
 
-    def create(self, arguments) -> str:
+class Shortcuts():
+    def create(data, arguments) -> str:
         shortcut, source, *destination = arguments
-        if shortcut in self.data:
+        if shortcut in data:
             return f'Shortcut exists: "{shortcut}"'
-        self.data[shortcut] = {
+        data[shortcut] = {
             'source': source,
             'destination': destination,
         }
         return f'Shortcut is created: "{shortcut}".'
 
-    def show(self, shortcuts: list) -> str:
-        output = []
-        for shortcut in shortcuts:
-            output.append(shortcut + ':\n' + str(self.data[shortcut]))
-        return ''.join(output)
-
-    def update(self, shortcuts: list) -> str:
+    def update(data, shortcuts: list) -> str:
         for shortcut in shortcuts:
             print(f'Updating "{shortcut}"')
             source = input('Source: ["enter" to skip]\n')
@@ -44,6 +36,17 @@ class Shortcuts():
             for field in changed:
                 if not changed[field]:
                     continue
-                self.data[shortcut][field] = changed[field]
-
+                data[shortcut][field] = changed[field]
         return 'Updated successfully.'
+
+    def delete(data, shortcuts: list) -> str:
+        pass
+
+    def show(data, shortcuts: list) -> str:
+        output = []
+        for shortcut in shortcuts:
+            output.append(shortcut + ':\n' + str(data[shortcut]))
+        return ''.join(output)
+
+    def showall(self) -> str:
+        pass

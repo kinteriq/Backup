@@ -17,7 +17,7 @@
 
 MSG = {
     'invalid_cmd': 'There is no such command.',
-    'no_args': 'Zero arguments provided.',
+    'empty': 'Zero arguments provided.',
 }
 
 
@@ -34,6 +34,6 @@ class InvalidCommand(Error):
         super().__init__(message=MSG['invalid_cmd'])
 
 
-class NoArgs(Error):
+class Empty(Error):
     def __init__(self):
-        super().__init__(message=MSG['no_args'])
+        super().__init__(message=MSG['empty'])
