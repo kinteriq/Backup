@@ -19,26 +19,26 @@ import json
 import sys
 
 
-def create_json(file: str) -> str:
-    with open(file, 'w') as f:
-        f.write(json.dumps({}))
-    return read_from(file)
-
-
-def read_from(file: str) -> dict:
-    with open(file, 'r') as f:
-        file = json.load(f)
-    return file
-
-def write_to(file: json, data: dict):
-    pass
-
-def get_data():
+def main(file) -> dict:
     try:
-        data = read_from('shortcuts.json')
-    except FileNotFoundError as exc:
-        data = create_json('shortcuts.json')
-    else:
-        print('DATA FILE COULD NOT BE CREATED')
-        sys.exit()
-    return data
+        data = read_from(file)
+        return data
+    except FileNotFoundError:
+        create(file)
+        data = read_from(file)
+        return data
+
+
+def read_from(file):
+    with open(file, 'r') as source:
+        data = json.load(source)
+        return data
+
+
+def create(file):
+    with open(file, 'w') as source:
+        source.write(json.dumps({}))
+
+
+def write_to(file):
+    pass
