@@ -40,5 +40,6 @@ def create(file):
         source.write(json.dumps({}))
 
 
-def write_to(file):
-    pass
+def write_to(file, data: dict):
+    with open(file, 'w') as source:
+        source.write(json.dumps(data))
