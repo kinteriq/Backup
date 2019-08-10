@@ -20,11 +20,10 @@ import sys
 from shortcuts import Shortcuts as Shortcuts
 import error
 
-
 COMMANDS = {
     'create': Shortcuts.create,
     'update': Shortcuts.update,
-    'delete': None,
+    'delete': Shortcuts.delete,
     'show': Shortcuts.show,
     'showall': None,
 }

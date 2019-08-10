@@ -17,6 +17,8 @@ UPDATE_ARGS = ['backup.py', 'update', CREATE_ARGS[2]]
 
 BACKUP_ARGS = ['backup.py', CREATE_ARGS[2]]
 
+DELETE_ARGS = ['backup.py', 'delete', CREATE_ARGS[2]]
+
 
 def patched_execute_command(data, args):
     with patch.object(sys, 'argv', args):
@@ -72,6 +74,15 @@ class TestCommandLine(unittest.TestCase):
         patched_execute_command(self.data, CREATE_ARGS)
         with self.assertRaisesRegex(SystemExit, 'BACKUP IS FINISHED'):
             patched_execute_command(self.data, BACKUP_ARGS)
+
+    # Decides to delete shortcut from the database
+    def test_receive_delete_command(self):
+        count = len(DELETE_ARGS[2:])
+        deleted_sequence = ', '.join(DELETE_ARGS[2:])
+        expected_output = f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
+        patched_execute_command(self.data, CREATE_ARGS)
+        output = patched_execute_command(self.data, DELETE_ARGS)
+        self.assertEqual(output, expected_output)
 
 
 if __name__ == '__main__':

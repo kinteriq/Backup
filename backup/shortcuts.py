@@ -40,7 +40,13 @@ class Shortcuts():
         return 'Updated successfully.'
 
     def delete(data, arguments) -> str:
-        pass
+        deleted = []
+        for shortcut in arguments:
+            data.pop(shortcut)
+            deleted.append(shortcut)
+        count = len(deleted)
+        deleted_sequence = ', '.join(deleted)
+        return f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
 
     def show(data, arguments) -> str:
         output = []
