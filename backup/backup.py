@@ -16,14 +16,14 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import file_handle
-from commands import execute_command
-
-DATA = file_handle.main('shortcuts.json')
+from commands import read_from_command_line, execute_command
 
 
-def main():
-    execute_command(DATA)
+def main(data):
+    command, *params = read_from_command_line(data)
+    execute_command(data=data, command=command, params=params)
 
 
 if __name__ == '__main__':
-    main()
+    data = file_handle.main('shortcuts.json')
+    main(data)
