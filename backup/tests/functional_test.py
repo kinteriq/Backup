@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from .context import backup
-from backup.commands import execute_command
+from backup.commands import read_from_command_line, execute_command
 
 CREATE_ARGS = [
     'backup.py', 'create', 'test', 'wrong/pathfrom', 'path/to_1', 'path/to_2'
@@ -20,10 +20,28 @@ BACKUP_ARGS = ['backup.py', CREATE_ARGS[2]]
 DELETE_ARGS = ['backup.py', 'delete', CREATE_ARGS[2]]
 
 
-def patched_execute_command(data, args):
+def patched_read_from_command_line(data, args):
     with patch.object(sys, 'argv', args):
-        output = execute_command(data)
-        return output
+        params = read_from_command_line(data)
+        return params
+
+
+def mock_create_command(data):
+    command, *params = patched_read_from_command_line(data, CREATE_ARGS)
+    output = execute_command(data=data, command=command, params=params)
+    return output
+
+
+def execution(data, args):
+    """
+    creates some mock data
+    executes particular command
+    returns result of execution
+    """
+    mock_create_command(data)
+    command, *params = patched_read_from_command_line(data, args)
+    output = execute_command(data=data, command=command, params=params)
+    return output
 
 
 class TestCommandLine(unittest.TestCase):
@@ -40,7 +58,7 @@ class TestCommandLine(unittest.TestCase):
     # User creates a shortcut and sees the program's output
     def test_receive_create_command(self):
         expected_output = f'Shortcut is created: "{self.shortcut}".'
-        output = patched_execute_command(self.data, CREATE_ARGS)
+        output = mock_create_command(self.data)
         self.assertEqual(output, expected_output)
 
     # Checks that the shortcut was saved by entering 'show {shortcut}' command
@@ -54,8 +72,7 @@ class TestCommandLine(unittest.TestCase):
                     'destination': paths_to
                 }
             )
-        patched_execute_command(self.data, CREATE_ARGS)
-        output = patched_execute_command(self.data, SHOW_ARGS)
+        output = execution(data=self.data, args=SHOW_ARGS)
         self.assertEqual(output, expected_output)
 
     # Sees that the source path is wrong;
@@ -65,23 +82,23 @@ class TestCommandLine(unittest.TestCase):
     @patch('builtins.input', side_effect=user_input)
     def test_receive_update_command(self, user_input):
         expected_output = 'Updated successfully.'
-        patched_execute_command(self.data, CREATE_ARGS)
-        output = patched_execute_command(self.data, UPDATE_ARGS)
+        output = execution(data=self.data, args=UPDATE_ARGS)
         self.assertEqual(output, expected_output)
 
     # Does a backup using the saved shortcut
     def test_backup(self):
-        patched_execute_command(self.data, CREATE_ARGS)
+        mock_create_command(self.data)
         with self.assertRaisesRegex(SystemExit, 'BACKUP IS FINISHED'):
-            patched_execute_command(self.data, BACKUP_ARGS)
+            command, *params = patched_read_from_command_line(
+                self.data, BACKUP_ARGS)
+            execute_command(data=self.data, command=command, params=params)
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):
         count = len(DELETE_ARGS[2:])
         deleted_sequence = ', '.join(DELETE_ARGS[2:])
         expected_output = f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
-        patched_execute_command(self.data, CREATE_ARGS)
-        output = patched_execute_command(self.data, DELETE_ARGS)
+        output = execution(data=self.data, args=DELETE_ARGS)
         self.assertEqual(output, expected_output)
 
 
