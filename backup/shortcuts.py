@@ -15,45 +15,56 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from config import DATAPATH
+from file_handle import write_to_file
 
-class Shortcuts():
-    def create(data, arguments) -> str:
-        shortcut, source, *destination = arguments
-        if shortcut in data:
-            return f'Shortcut exists: "{shortcut}"'
-        data[shortcut] = {
-            'source': source,
-            'destination': destination,
-        }
-        return f'Shortcut is created: "{shortcut}".'
 
-    def update(data, arguments) -> str:
-        for shortcut in arguments:
-            print(f'Updating "{shortcut}"')
-            source = input('Source: ["enter" to skip]\n')
-            destination = input('Destination: ["enter" to skip]\n')
-            changed = {'source': source, 'destination': destination}
-            for field in changed:
-                if not changed[field]:
-                    continue
-                data[shortcut][field] = changed[field]
-        return 'Updated successfully.'
+def create(arguments, data) -> str:
+    shortcut, source, *destination = arguments
+    # TODO check if it exists
+    data[shortcut] = {                          # TODO how to edit json file? without rewrite
+        'source': source,
+        'destination': destination,
+    }
+    if data:
+        write_to_file(data, path=DATAPATH)
+    return f'Shortcut is created: {shortcut}.'
 
-    def delete(data, arguments) -> str:
-        deleted = []
-        for shortcut in arguments:
-            data.pop(shortcut)
-            deleted.append(shortcut)
-        count = len(deleted)
-        deleted_sequence = ', '.join(deleted)
-        return f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
 
-    def show(data, arguments) -> str:
-        output = []
-        for shortcut in arguments:
-            output.append(shortcut + ':\n' + str(data[shortcut]))
-        return ''.join(output)
+def update(arguments, data):
+    for shortcut in arguments:
+        print(f'Updating "{shortcut}"')
+        source = input('Source: ["enter" to skip]\n')
+        destination = input('Destination: ["enter" to skip]\n')
+        changed = {'source': source, 'destination': destination}
+        for field in changed:
+            if not changed[field]:
+                continue
+            data[shortcut][field] = changed[field]
+        if data:
+            write_to_file(data, path=DATAPATH)
+    return 'Updated successfully.'
 
-    def showall(data) -> str:
-        all_shortcuts = data.keys()
-        return '\n'.join(all_shortcuts)
+
+def delete(arguments, data):
+    deleted = []
+    for shortcut in arguments:
+        data.pop(shortcut)
+        deleted.append(shortcut)
+    count = len(deleted)
+    deleted_sequence = ', '.join(deleted)
+    if data:
+        write_to_file(data, path=DATAPATH)
+    return f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
+
+
+def show(arguments, data):
+    output = []
+    for shortcut in arguments:
+        output.append('\n' + shortcut + ':\n  ' + str(data[shortcut]))
+    return ''.join(output) + '\n'
+
+
+def showall(data, arguments=None):
+    all_shortcuts = data.keys()
+    return '\n'.join(all_shortcuts)

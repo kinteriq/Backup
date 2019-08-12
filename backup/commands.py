@@ -17,25 +17,28 @@
 
 import sys
 
-from shortcuts import Shortcuts as Shortcuts
+import check
 import error
+from file_handle import DATABASE
+import shortcuts
 
 COMMANDS = {
-    'create': Shortcuts.create,
-    'update': Shortcuts.update,
-    'delete': Shortcuts.delete,
-    'show': Shortcuts.show,
-    'showall': Shortcuts.showall,
+    'create': shortcuts.create,
+    'update': shortcuts.update,
+    'delete': shortcuts.delete,
+    'show': shortcuts.show,
+    'showall': shortcuts.showall,
+    'clear': None,
 }
 
 
-def read_from_command_line(data: dict) -> list:
+def read_from_command_line(data) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
     try:
-        _is_empty(args)
-        _is_showall(data=data, args=args)
-        _is_shortcut_name(data=data, args=args)
-        _is_invalid_command(args)
+        check.empty(args)
+        check.showall(arguments=args)
+        check.shortcut_name(data, arguments=args)
+        check.invalid_command(commands=COMMANDS, arguments=args)
     except error.Empty as e:
         sys.exit(e)
     except error.InvalidCommand as e:
@@ -43,33 +46,15 @@ def read_from_command_line(data: dict) -> list:
     return args
 
 
-def execute_command(data: dict, command, params) -> str:
-    output = COMMANDS[command](data=data, arguments=params)
-    return output
+def execute_command(command, params, data) -> str:
+    message = COMMANDS[command](arguments=params, data=data)
+    return message
 
 
-def _is_empty(args):
-    if not args:
-        raise error.Empty
-
-
-def _is_shortcut_name(data, args):
-    valid_name = args[0] in data
-    if len(args) == 1 and valid_name:
-        _run_backup(shortcut=args[0])
-        sys.exit('BACKUP IS FINISHED')
-
-
-def _run_backup(shortcut):
-    pass
-
-
-def _is_invalid_command(args):
-    if args[0] not in COMMANDS:
-        raise error.InvalidCommand
-
-
-def _is_showall(data, args):
-    if args[0] == 'showall':
-        all_shortcuts = COMMANDS['showall'](data)
-        sys.exit(all_shortcuts)
+if __name__ == '__main__':
+    # add to tests
+    print(execute_command('create', ['TEST', 'a', 'b']))
+    print(execute_command('show', ['TEST']))
+    print(execute_command('showall', []))
+    print(execute_command('delete', ['TEST']))
+    print(execute_command('showall', []))

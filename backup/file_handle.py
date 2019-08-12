@@ -16,10 +16,13 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import os
 import sys
 
+from config import DATAPATH
 
-def main(file) -> dict:
+
+def retreive(file) -> dict:
     try:
         data = read_from(file)
         return data
@@ -29,7 +32,7 @@ def main(file) -> dict:
         return data
 
 
-def read_from(file):
+def read_from(file) -> dict:
     with open(file, 'r') as source:
         data = json.load(source)
         return data
@@ -40,6 +43,14 @@ def create(file):
         source.write(json.dumps({}))
 
 
-def write_to(file, data: dict):
-    with open(file, 'w') as source:
+def write_to_file(data: dict, path):
+    with open(path, 'w') as source:
         source.write(json.dumps(data))
+
+
+def get_shortcut_info(shortcut, path) -> dict:
+    data = read_from(path)
+    return data[shortcut]
+
+
+DATABASE = retreive(DATAPATH)

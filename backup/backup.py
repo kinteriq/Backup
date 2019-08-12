@@ -15,15 +15,15 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import file_handle
 from commands import read_from_command_line, execute_command
+from file_handle import DATABASE
 
 
-def main(data):
-    command, *params = read_from_command_line(data)
-    execute_command(data=data, command=command, params=params)
+def main():
+    command, *params = read_from_command_line(data=DATABASE)
+    message = execute_command(command=command, params=params, data=DATABASE)
+    print(message)
 
 
 if __name__ == '__main__':
-    data = file_handle.main('shortcuts.json')
-    main(data)
+    main()
