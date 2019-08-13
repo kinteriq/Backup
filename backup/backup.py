@@ -16,12 +16,14 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from commands import read_from_command_line, execute_command
-from file_handle import DATABASE
+import file_handle
 
 
 def main():
-    command, *params = read_from_command_line(data=DATABASE)
-    message = execute_command(command=command, params=params, data=DATABASE)
+    command, *params = read_from_command_line(data=file_handle.DATABASE)
+    message = execute_command(command=command,
+                              params=params,
+                              data == file_handle.DATABASE)
     print(message)
 
 

@@ -7,13 +7,27 @@ from unittest.mock import patch
 from .context import backup
 from backup.commands import read_from_command_line, execute_command
 
+NO_ARGS = ['backup.py']
+
 CREATE_ARGS = [
     'backup.py', 'create', 'test', 'wrong/pathfrom', 'path/to_1', 'path/to_2'
+]
+
+WRONG_CREATE_COMMAND_ARGS = [
+    'backup.py', 'crete', 'test', 'wrong/pathfrom', 'path/to_1', 'path/to_2'
 ]
 
 SHOW_ARGS = ['backup.py', 'show', CREATE_ARGS[2]]
 
 UPDATE_ARGS = ['backup.py', 'update', CREATE_ARGS[2]]
+
+ANOTHER_CREATE_ARGS = [
+    'backup.py', 'create', 'test_2', 'pathfrom', 'path/to_1', 'path/to_2'
+]
+
+SHOWALL_ARGS = ['backup.py', 'showall']
+
+WRONG_SHORTCUT_ARGS = ['backup.py', str(CREATE_ARGS[2]) + 'wrong']
 
 BACKUP_ARGS = ['backup.py', CREATE_ARGS[2]]
 
@@ -26,9 +40,9 @@ def patched_read_from_command_line(args, data):
         return params
 
 
-def mock_create_command(data):
-    command, *params = patched_read_from_command_line(args=CREATE_ARGS, data=data)
-    output = execute_command(data=data, command=command, params=params)
+def mock_create_command(data, args=CREATE_ARGS):
+    command, *params = patched_read_from_command_line(args=args, data=data)
+    output = execute_command(command=command, params=params, data=data)
     return output
 
 
@@ -40,7 +54,7 @@ def execution(args, data):
     """
     mock_create_command(data=data)
     command, *params = patched_read_from_command_line(args=args, data=data)
-    output = execute_command(data=data, command=command, params=params)
+    output = execute_command(command=command, params=params, data=data)
     return output
 
 
@@ -54,6 +68,17 @@ class TestCommandLine(unittest.TestCase):
 
     def tearDown(self):
         os.remove('shortcuts_test.json')
+
+    # User enters empty command
+    def test_receive_empty_command(self):
+        with self.assertRaises(SystemExit):
+            patched_read_from_command_line(args=NO_ARGS, data=self.data)
+
+    # User tries creating a shortcut but misspells 'create'
+    def test_receive_invalid_command(self):
+        with self.assertRaises(SystemExit):
+            patched_read_from_command_line(args=WRONG_CREATE_COMMAND_ARGS,
+                                           data=self.data)
 
     # User creates a shortcut and sees the program's output
     def test_receive_create_command(self):
@@ -70,7 +95,7 @@ class TestCommandLine(unittest.TestCase):
                                'source': path_from,
                                'destination': paths_to
                            }) + '\n')
-        output = execution(data=self.data, args=SHOW_ARGS)
+        output = execution(args=SHOW_ARGS, data=self.data)
         self.assertEqual(output, expected_output)
 
     # Sees that the source path is wrong;
@@ -80,10 +105,24 @@ class TestCommandLine(unittest.TestCase):
     @patch('builtins.input', side_effect=user_input)
     def test_receive_update_command(self, user_input):
         expected_output = 'Updated successfully.'
-        output = execution(data=self.data, args=UPDATE_ARGS)
+        output = execution(args=UPDATE_ARGS, data=self.data)
         self.assertEqual(output, expected_output)
 
-    # Does a backup using the saved shortcut
+    # User creates another shortcut and checks that they are both saved
+    # with 'showall' command
+    def test_receive_showall_command(self):
+        mock_create_command(data=self.data, args=ANOTHER_CREATE_ARGS)
+        output = execution(args=SHOWALL_ARGS, data=self.data)
+        expected_output = '\n'.join(self.data.keys())
+        self.assertEqual(output, expected_output)
+
+    # User tries backing up using the saved shortcut but misspells its name
+    def test_receive_invalid_shortcut_name(self):
+        with self.assertRaises(SystemExit):
+            patched_read_from_command_line(args=WRONG_SHORTCUT_ARGS,
+                                           data=self.data)
+
+    # Enters the correct shortcut's name
     # TODO
 
     # Decides to delete shortcut from the database
@@ -91,7 +130,7 @@ class TestCommandLine(unittest.TestCase):
         count = len(DELETE_ARGS[2:])
         deleted_sequence = ', '.join(DELETE_ARGS[2:])
         expected_output = f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
-        output = execution(data=self.data, args=DELETE_ARGS)
+        output = execution(args=DELETE_ARGS, data=self.data)
         self.assertEqual(output, expected_output)
 
 
