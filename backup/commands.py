@@ -18,8 +18,6 @@
 import sys
 
 import check
-import error
-from file_handle import DATABASE
 import shortcuts
 
 COMMANDS = {
@@ -34,27 +32,19 @@ COMMANDS = {
 
 def read_from_command_line(data) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
-    try:
-        check.empty(args)
-        check.showall(arguments=args)
-        check.shortcut_name(data, arguments=args)
-        check.invalid_command(commands=COMMANDS, arguments=args)
-    except error.Empty as e:
-        sys.exit(e)
-    except error.InvalidCommand as e:
-        sys.exit(e)
+    check.empty(args)
+    check.invalid_shortcut_name(data=data, arguments=args)
+    check.invalid_command(commands=COMMANDS, arguments=args)
+    showall_cmd = args[0] == 'showall'
+    run_backup_cmd = len(args) == 1 and args[0] in data
+    if showall_cmd:
+        args = ['showall', None, data]
+    elif run_backup_cmd:
+        runner.copy_all(shortcut=args[0])
+        sys.exit('BACKUP IS FINISHED.')
     return args
 
 
 def execute_command(command, params, data) -> str:
     message = COMMANDS[command](arguments=params, data=data)
     return message
-
-
-if __name__ == '__main__':
-    # add to tests
-    print(execute_command('create', ['TEST', 'a', 'b']))
-    print(execute_command('show', ['TEST']))
-    print(execute_command('showall', []))
-    print(execute_command('delete', ['TEST']))
-    print(execute_command('showall', []))
