@@ -18,6 +18,7 @@
 import sys
 
 import check
+import runner
 import shortcuts
 
 COMMANDS = {

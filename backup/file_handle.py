@@ -48,7 +48,7 @@ def write_to_file(data: dict, path):
         source.write(json.dumps(data))
 
 
-def get_shortcut_info(shortcut, path) -> dict:
+def get_shortcut_info(shortcut, path):
     data = read_from(path)
     return data[shortcut]
 

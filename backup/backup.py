@@ -23,7 +23,7 @@ def main():
     command, *params = read_from_command_line(data=file_handle.DATABASE)
     message = execute_command(command=command,
                               params=params,
-                              data == file_handle.DATABASE)
+                              data=file_handle.DATABASE)
     print(message)
 
 
