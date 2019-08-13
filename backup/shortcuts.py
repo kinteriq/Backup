@@ -16,12 +16,14 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from config import DATAPATH
+import check
 from file_handle import write_to_file
 
 
+# TODO remove DATAPATH from write_to_file
 def create(arguments, data) -> str:
     shortcut, source, *destination = arguments
-    # TODO check if it exists
+    check.shortcut_exists(shortcut=shortcut, data=data)
     data[shortcut] = {                          # TODO how to edit json file? without rewrite
         'source': source,
         'destination': destination,

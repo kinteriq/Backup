@@ -18,6 +18,8 @@
 MSG = {
     'invalid_cmd': 'There is no such command.',
     'empty': 'Zero arguments provided.',
+    'invalid_shortcut_name': 'There is no such shortcut saved.',
+    'shortcut_exists': 'Shortcut is already in the database. Try "update" command.',
 }
 
 
@@ -37,3 +39,13 @@ class InvalidCommand(Error):
 class Empty(Error):
     def __init__(self):
         super().__init__(message=MSG['empty'])
+
+
+class InvalidShortcutName(Error):
+    def __init__(self):
+        super().__init__(message=MSG['invalid_shortcut_name'])
+
+
+class ShortcutExists(Error):
+    def __init__(self):
+        super().__init__(message=MSG['shortcut_exists'])
