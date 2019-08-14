@@ -1,4 +1,3 @@
-# TODO move runner and execute_command out
 import sys
 
 import error
@@ -23,6 +22,10 @@ def invalid_shortcut_name(data, arguments):
 
 
 def invalid_command(commands, arguments):
+    """
+    :param: commands:
+        iterable; has all available commands
+    """
     try:
         invalid_command = arguments[0] not in commands
         if len(arguments) > 1 and invalid_command:

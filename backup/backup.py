@@ -19,13 +19,13 @@ from commands import read_from_command_line, execute_command
 import file_handle
 
 
-def main():
-    command, *params = read_from_command_line(data=file_handle.DATABASE)
-    message = execute_command(command=command,
-                              params=params,
-                              data=file_handle.DATABASE)
-    print(message)
+def main(data):
+    command, *params = read_from_command_line(data=data)
+    message = execute_command(command=command, params=params, data=data)
+    return message
 
 
 if __name__ == '__main__':
-    main()
+    data = file_handle.DATABASE
+    output = main(data=data)
+    print(output)
