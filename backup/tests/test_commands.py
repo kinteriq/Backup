@@ -20,10 +20,7 @@ SHOWALL_ARGS = ['backup.py', 'showall']
 
 BACKUP_ARGS = ['backup.py', SHORTCUT_NAME]
 
-VALID_CMD_ARGS = [
-    'backup.py', 'create', SHORTCUT_NAME, 'from/path', 'to/path'
-]
-
+VALID_CMD_ARGS = ['backup.py', 'create', SHORTCUT_NAME, 'from/path', 'to/path']
 
 
 class TestReadFromCommandLine():

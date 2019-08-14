@@ -4,7 +4,7 @@ import json
 
 from backup.file_handle import (retreive, create, read_from, write_to_file,
                                 get_shortcut_info)
-from .fixtures import mock_data, mock_filepath
+from .fixtures import mock_filepath
 
 
 def test_retreive_existed_file(mock_filepath):
