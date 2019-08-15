@@ -16,16 +16,20 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from commands import read_from_command_line, execute_command
+import config
 import file_handle
 
 
-def main(data):
+def main(data) -> str:
     command, *params = read_from_command_line(data=data)
-    message = execute_command(command=command, params=params, data=data)
+    message, altered_data = execute_command(command=command,
+                                            params=params,
+                                            data=data)
+    if altered_data:
+        file_handle.write_to_file(data=altered_data, path=config.DATAPATH)
     return message
 
 
 if __name__ == '__main__':
-    data = file_handle.DATABASE
-    output = main(data=data)
-    print(output)
+    database = file_handle.retriev(config.DATAPATH)
+    print(main(data=database))

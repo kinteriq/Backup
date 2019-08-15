@@ -17,8 +17,6 @@
 
 import json
 
-from config import DATAPATH
-
 
 def retreive(file) -> dict:
     try:
@@ -49,6 +47,3 @@ def write_to_file(data: dict, path):
 def get_shortcut_info(shortcut, path):
     data = read_from(path)
     return data[shortcut]
-
-
-DATABASE = retreive(DATAPATH)

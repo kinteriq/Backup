@@ -15,25 +15,20 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from config import DATAPATH
 import check
-from file_handle import write_to_file
 
 
-# TODO remove DATAPATH from write_to_file
-def create(arguments, data) -> str:
+def create(arguments, data) -> tuple:
     shortcut, source, *destination = arguments
     check.shortcut_exists(shortcut=shortcut, data=data)
-    data[shortcut] = {                          # TODO how to edit json file? without rewrite
-        'source': source,
+    data[shortcut] = {                          # TODO how to edit json file?
+        'source': source,                       # without rewrite
         'destination': destination,
     }
-    if data:
-        write_to_file(data, path=DATAPATH)
-    return f'Shortcut is created: {shortcut}.'
+    return (f'Shortcut is created: {shortcut}.', data)
 
 
-def update(arguments, data):
+def update(arguments, data) -> tuple:
     for shortcut in arguments:
         print(f'Updating "{shortcut}"')
         source = input('Source: ["enter" to skip]\n')
@@ -43,30 +38,27 @@ def update(arguments, data):
             if not changed[field]:
                 continue
             data[shortcut][field] = changed[field]
-        if data:
-            write_to_file(data, path=DATAPATH)
-    return 'Updated successfully.'
+    return ('Updated successfully.', data)
 
 
-def delete(arguments, data):
+def delete(arguments, data) -> tuple:
     deleted = []
     for shortcut in arguments:
         data.pop(shortcut)
         deleted.append(shortcut)
     count = len(deleted)
     deleted_sequence = ', '.join(deleted)
-    if data:
-        write_to_file(data, path=DATAPATH)
-    return f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
+    return (f'Successfully deleted {count} shortcut(s): {deleted_sequence}.',
+            data)
 
 
-def show(arguments, data):
+def show(arguments, data) -> tuple:
     output = []
     for shortcut in arguments:
         output.append('\n' + shortcut + ':\n  ' + str(data[shortcut]))
-    return ''.join(output) + '\n'
+    return (''.join(output) + '\n', None)
 
 
-def showall(data, arguments=None):
+def showall(data, arguments=None) -> tuple:
     all_shortcuts = data.keys()
-    return '\n'.join(all_shortcuts)
+    return ('\n'.join(all_shortcuts), None)
