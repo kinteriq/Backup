@@ -34,7 +34,7 @@ COMMANDS = {
 def read_from_command_line(data) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
     check.empty(args)
-    check.invalid_shortcut_name(data=data, arguments=args)
+    check.invalid_shortcut_name(commands=COMMANDS, data=data, arguments=args)
     check.invalid_command(commands=COMMANDS, arguments=args)
     showall_cmd = args[0] == 'showall'
     run_backup_cmd = len(args) == 1 and args[0] in data
@@ -46,6 +46,6 @@ def read_from_command_line(data) -> list:
     return args
 
 
-def execute_command(command, params, data) -> str:
-    message = COMMANDS[command](arguments=params, data=data)
-    return message
+def execute_command(command, params, data) -> tuple:
+    message, altered_data = COMMANDS[command](arguments=params, data=data)
+    return (message, altered_data)
