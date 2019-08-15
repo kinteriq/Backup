@@ -18,6 +18,7 @@
 import check
 
 
+# TODO add arguments check
 def create(arguments, data) -> tuple:
     shortcut, source, *destination = arguments
     check.shortcut_exists(shortcut=shortcut, data=data)
