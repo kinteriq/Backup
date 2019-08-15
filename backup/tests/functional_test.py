@@ -42,7 +42,7 @@ def patched_read_from_command_line(args, data):
 
 def mock_create_command(data, args=CREATE_ARGS):
     command, *params = patched_read_from_command_line(args=args, data=data)
-    output = execute_command(command=command, params=params, data=data)
+    output, _ = execute_command(command=command, params=params, data=data)
     return output
 
 
@@ -54,7 +54,7 @@ def execution(args, data):
     """
     mock_create_command(data=data)
     command, *params = patched_read_from_command_line(args=args, data=data)
-    output = execute_command(command=command, params=params, data=data)
+    output, _ = execute_command(command=command, params=params, data=data)
     return output
 
 
@@ -129,7 +129,8 @@ class TestCommandLine(unittest.TestCase):
     def test_receive_delete_command(self):
         count = len(DELETE_ARGS[2:])
         deleted_sequence = ', '.join(DELETE_ARGS[2:])
-        expected_output = f'Successfully deleted {count} shortcut(s): {deleted_sequence}.'
+        expected_output = (f'Successfully deleted {count} '
+                           f'shortcut(s): {deleted_sequence}.')
         output = execution(args=DELETE_ARGS, data=self.data)
         self.assertEqual(output, expected_output)
 

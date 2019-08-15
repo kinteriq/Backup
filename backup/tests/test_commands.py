@@ -47,7 +47,6 @@ class TestReadFromCommandLine():
         data = dict()
         data['first'] = 'testing'
         data['second'] = 'another test'
-        expected_output = '\n'.join(['first', 'second'])
         assert read_from_command_line(data=data)
 
     @pytest.mark.skip('WIP')
@@ -67,5 +66,5 @@ def test_execute_create_command(mock_data):
     shortcut = VALID_CMD_ARGS[2]
     command, *params = VALID_CMD_ARGS[1:]
     expected_output = f'Shortcut is created: {shortcut}.'
-    output = execute_command(command=command, params=params, data=mock_data)
+    output, _ = execute_command(command=command, params=params, data=mock_data)
     assert output == expected_output
