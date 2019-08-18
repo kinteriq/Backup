@@ -18,7 +18,6 @@
 import sys
 
 import check
-import runner
 import shortcuts
 
 COMMANDS = {
@@ -33,17 +32,10 @@ COMMANDS = {
 
 def read_from_command_line(data) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
-    check.empty(args)
-    check.invalid_shortcut_name(commands=COMMANDS, data=data, arguments=args)
-    check.invalid_command(commands=COMMANDS, arguments=args)
-    showall_cmd = args[0] == 'showall'
-    run_backup_cmd = len(args) == 1 and args[0] in data
-    if showall_cmd:
-        args = ['showall', None, data]
-    elif run_backup_cmd:
-        runner.copy_all(shortcut=args[0])
-        sys.exit('BACKUP IS FINISHED.')
-    return args
+    valid_args = check.CommandLine(data=data,
+                                   arguments=args,
+                                   all_commands=COMMANDS).complete()
+    return valid_args
 
 
 def execute_command(command, params, data) -> tuple:
