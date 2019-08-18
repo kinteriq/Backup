@@ -3,24 +3,22 @@ import sys
 
 from .context import backup
 from backup.commands import read_from_command_line, execute_command
-from backup.error import MSG as error_message
+from backup.check import MSG as error_message
 from .fixtures import mock_data
 
 EMPTY_ARGS = []
 
 NO_DATA = {}
 
-SHORTCUT_NAME = 'NAME'
-
-WRONG_BACKUP_ARGS = ['backup.py', 'wrong-name']
+SHORTCUT_NAMES = ['first', 'second', 'third']
 
 INVALID_CMD_ARGS = ['backup.py', 'messed', 'up']
 
 SHOWALL_ARGS = ['backup.py', 'showall']
 
-BACKUP_ARGS = ['backup.py', SHORTCUT_NAME]
+BACKUP_ARGS = ['backup.py'] + SHORTCUT_NAMES
 
-VALID_CMD_ARGS = ['backup.py', 'create', SHORTCUT_NAME, 'from/path', 'to/path']
+VALID_CMD_ARGS = ['backup.py', 'create', 'NAME', 'from/path', 'to/path']
 
 
 class TestReadFromCommandLine():
@@ -29,12 +27,6 @@ class TestReadFromCommandLine():
         with pytest.raises(SystemExit) as e:
             read_from_command_line(data=NO_DATA)
         assert error_message['empty'] in e.exconly()
-
-    def test_got_invalid_shortcut_name(self, monkeypatch):
-        monkeypatch.setattr(sys, 'argv', WRONG_BACKUP_ARGS)
-        with pytest.raises(SystemExit) as e:
-            read_from_command_line(data=NO_DATA)
-        assert error_message['invalid_shortcut_name'] in e.exconly()
 
     def test_got_invalid_command(self, monkeypatch):
         monkeypatch.setattr(sys, 'argv', INVALID_CMD_ARGS)
@@ -49,13 +41,14 @@ class TestReadFromCommandLine():
         data['second'] = 'another test'
         assert read_from_command_line(data=data)
 
-    @pytest.mark.skip('WIP')
     def test_got_a_shortcut(self, monkeypatch):
         monkeypatch.setattr(sys, 'argv', BACKUP_ARGS)
         data = dict()
-        data[SHORTCUT_NAME] = 'testing'
-        with pytest.raises(SystemExit):
-            read_from_command_line(data=data)
+        for name in SHORTCUT_NAMES:
+            data[name] = '_'
+        command, *params = read_from_command_line(data=data)
+        print(command, params)
+        assert (command, params) == (None, BACKUP_ARGS[1:])
 
     def test_got_valid_command(self, monkeypatch):
         monkeypatch.setattr(sys, 'argv', VALID_CMD_ARGS)

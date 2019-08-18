@@ -122,8 +122,17 @@ class TestCommandLine(unittest.TestCase):
             patched_read_from_command_line(args=WRONG_SHORTCUT_ARGS,
                                            data=self.data)
 
+    # TODO FINISH
     # Enters the correct shortcut's name
-    # TODO
+    def test_runbackup_command(self):
+        """
+        If backup args are correct:
+            the return value for the command will be None.
+        """
+        mock_create_command(data=self.data, args=CREATE_ARGS)
+        command, *params = patched_read_from_command_line(args=BACKUP_ARGS,
+                                                          data=self.data)
+        assert not command
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):
