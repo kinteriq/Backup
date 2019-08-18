@@ -15,15 +15,12 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import check
 
-
-# TODO add arguments check
+# TODO SQLite
 def create(arguments, data) -> tuple:
     shortcut, source, *destination = arguments
-    check.shortcut_exists(shortcut=shortcut, data=data)
-    data[shortcut] = {                          # TODO how to edit json file?
-        'source': source,                       # without rewrite
+    data[shortcut] = {
+        'source': source,
         'destination': destination,
     }
     return (f'Shortcut is created: {shortcut}.', data)
