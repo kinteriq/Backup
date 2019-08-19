@@ -14,49 +14,103 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import os
+import sqlite3
 
 
-# TODO SQLite
-def create(arguments, data) -> tuple:
-    shortcut, source, *destination = arguments
-    data[shortcut] = {
-        'source': source,
-        'destination': destination,
-    }
-    return (f'Shortcut is created: {shortcut}.', data)
+def db_creator(datapath):
+    connection = sqlite3.connect(datapath)
+    cursor = connection.cursor()
+    cursor.execute('''CREATE TABLE shortcuts
+        (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
+    connection.commit()
+    connection.close()
 
 
-def update(arguments, data) -> tuple:
+def db_connect(func):
+    """
+    Manages the connection with db, which is inside 'datapath'
+    """
+    def wrapper(args, datapath):
+        connection = sqlite3.connect(datapath)
+        cursor = connection.cursor()
+        func(args, cursor)
+        connection.commit()
+        connection.close()
+
+    return wrapper
+
+
+@db_connect
+def create(arguments, db_cursor):
+    shortcut, source, *destinations = arguments
+    # TODO:
+    # check source path
+    # check destinations
+    format_destinations = ', '.join(destinations)
+    values = (shortcut, source, format_destinations)
+    db_cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', values)
+    print(f'Shortcut is created: "{shortcut}".\n')
+
+
+@db_connect
+def update(arguments, db_cursor):
     for shortcut in arguments:
-        print(f'Updating "{shortcut}"')
-        source = input('Source: ["enter" to skip]\n')
-        destination = input('Destination: ["enter" to skip]\n')
-        changed = {'source': source, 'destination': destination}
-        for field in changed:
-            if not changed[field]:
-                continue
-            data[shortcut][field] = changed[field]
-    return ('Updated successfully.', data)
+        print(f'Update "{shortcut}"\n')
+        source = input('- Source ["enter" to skip]:\n')
+        destinations = input(
+            '- Destinations ["enter" to skip]:\n'
+            '*use commas to separate: /user/docs/, /user/temps/\n')
+        # TODO:
+        # check source path
+        # check destinations
+        if source:
+            db_cursor.execute('''UPDATE shortcuts SET source = ?''',
+                              (source, ))
+        if destinations:
+            db_cursor.execute('''UPDATE shortcuts SET destinations = ?''',
+                              (destinations, ))
+    print('Updated successfully.\n')
 
 
-def delete(arguments, data) -> tuple:
-    deleted = []
+@db_connect
+def delete(arguments, db_cursor):
     for shortcut in arguments:
-        data.pop(shortcut)
-        deleted.append(shortcut)
-    count = len(deleted)
-    deleted_sequence = ', '.join(deleted)
-    return (f'Successfully deleted {count} shortcut(s): {deleted_sequence}.',
-            data)
+        db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
+                          (shortcut, ))
+    print('Deleted successfully.\n')  # TODO add count and list
 
 
-def show(arguments, data) -> tuple:
-    output = []
+@db_connect
+def show(arguments, db_cursor):
     for shortcut in arguments:
-        output.append('\n' + shortcut + ':\n  ' + str(data[shortcut]))
-    return (''.join(output) + '\n', None)
+        selection = db_cursor.execute(
+            '''SELECT * FROM shortcuts WHERE name = ? ORDER BY name''',
+            (shortcut, ))
+        for row in selection:
+            name, source, destinations = row[0], row[1], row[2]
+            print(f'NAME:\n\t{name}\n'
+                  f'SOURCE:\n\t{source}\n'
+                  f'DESTINATIONS:\n\t{destinations}\n')
 
 
-def showall(data, arguments=None) -> tuple:
-    all_shortcuts = data.keys()
-    return ('\n'.join(all_shortcuts), None)
+@db_connect
+def showall(arguments, db_cursor):
+    selection = db_cursor.execute(
+        '''SELECT name FROM shortcuts ORDER BY name''')
+    print('SAVED NAMES:')
+    for row in selection:
+        print('\t' + row[0])
+    print()
+
+
+if __name__ == '__main__':
+    db_creator('test.db')
+    create(['NAME', 'SOURCE', 'DEST', '...'], datapath='test.db')
+    create(['TEST', 'SOURCE', 'DEST', '...'], datapath='test.db')
+    update(['NAME'], datapath='test.db')
+    show(['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
+    showall([], datapath='test.db')
+    delete(['NAME', 'wrong_NAME'], datapath='test.db')
+    show(['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
+    os.remove('test.db')
