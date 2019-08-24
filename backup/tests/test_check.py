@@ -1,43 +1,59 @@
 # TODO add all commands tests
 import pytest
+import os
+import sqlite3
 
 from backup import check
+from .fixtures import PATH, SHORTCUT_NAMES
 
-DATA = {
-    'TEST1': {},
-    'TEST2': {},
-    'TEST3': {},
-}
+COMMANDS = ('create', 'delete', 'show')
 
-commands = ('create', 'delete', 'show')
-
-INVALID_SHORTCUTS = check.CommandLine(data=DATA,
+INVALID_SHORTCUTS = check.CommandLine(datapath=PATH,
                                       arguments=['wrong1', 'wrong2', 'wrong3'],
-                                      all_commands=commands)
+                                      all_commands=COMMANDS)
 
-BACKUP_ARGS = check.CommandLine(data=DATA,
-                                arguments=list(DATA.keys()),
-                                all_commands=commands)
+BACKUP_ARGS = check.CommandLine(datapath=PATH,
+                                arguments=SHORTCUT_NAMES,
+                                all_commands=COMMANDS)
 
-INVALID_CMD = check.CommandLine(data=DATA,
+INVALID_CMD = check.CommandLine(datapath=PATH,
                                 arguments=['messed', 'up'],
-                                all_commands=commands)
+                                all_commands=COMMANDS)
 
-INVALID_CMD_ARGS = check.CommandLine(data=DATA,
-                                     arguments=['showall', 'up'],
-                                     all_commands=commands)
+INVALID_CMD_ARGS = check.CommandLine(datapath=PATH,
+                                     arguments=['showall', 'wrong_name'],
+                                     all_commands=COMMANDS)
 
 VALID_CMD = check.CommandLine(
-    data={},
-    arguments=['create', 'TEST1', 'from/path', 'to/path'],
-    all_commands=commands)
+    datapath=PATH,
+    arguments=['create', 'NAME', 'from/path', 'to/path'],
+    all_commands=COMMANDS)
 
-EMPTY_CMD = check.CommandLine(data=DATA, arguments=[], all_commands=commands)
+EMPTY_CMD = check.CommandLine(datapath=PATH,
+                              arguments=[],
+                              all_commands=COMMANDS)
 
 SHORTCUT_EXISTS_CMD = check.CommandLine(
-    data=DATA,
-    arguments=['create', 'TEST1', 'from/path', 'to/path'],
-    all_commands=commands)
+    datapath=PATH,
+    arguments=['create', SHORTCUT_NAMES[0], 'from/path', 'to/path'],
+    all_commands=COMMANDS)
+
+
+def setup_module():
+    connection = sqlite3.connect(PATH)
+    cursor = connection.cursor()
+    cursor.execute('''CREATE TABLE shortcuts
+        (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
+    first_name = (SHORTCUT_NAMES[0], 'from/path_1', 'to/path_1')
+    cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', first_name)
+    second_name = (SHORTCUT_NAMES[1], 'from/path_2', 'to/path_2')
+    cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', second_name)
+    connection.commit()
+    connection.close()
+
+
+def teardown_module():
+    os.remove(PATH)
 
 
 def test_check_no_args():
@@ -52,7 +68,7 @@ def test_check_invalid_shortcuts():
 
 def test_check_valid_backup_args():
     """
-    If all shortcuts are valid - returns a tuple with runbackup args,
+    If all shortcuts are valid - returns a tuple with valid args,
         where the first arg is None, and the rest - shortcut names.
     """
     assert len(BACKUP_ARGS.complete()) >= 2
@@ -75,6 +91,6 @@ def test_invalid_command_args():
 
 def test_valid_command():
     """
-    Tests function which returns tuple upon receiving a valid command
+    Test a function returns a non-empty tuple upon receiving a valid command
     """
     assert len(VALID_CMD.complete()) >= 1
