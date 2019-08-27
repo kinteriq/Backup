@@ -14,6 +14,7 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import functools
 import os
 import sqlite3
 
@@ -29,9 +30,10 @@ def db_creator(datapath):
 
 def db_connect(func):
     """
-    Manages the connection with db, which is inside 'datapath'
+    Manages the connection with the database which is in the 'datapath' file.
     """
-    def wrapper(args, datapath):
+    @functools.wraps(func)
+    def wrapper(datapath, args=tuple()):
         connection = sqlite3.connect(datapath)
         cursor = connection.cursor()
         func(args, cursor)
@@ -105,12 +107,19 @@ def showall(arguments, db_cursor):
 
 
 if __name__ == '__main__':
-    db_creator('test.db')
-    create(['NAME', 'SOURCE', 'DEST', '...'], datapath='test.db')
-    create(['TEST', 'SOURCE', 'DEST', '...'], datapath='test.db')
-    update(['NAME'], datapath='test.db')
-    show(['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
-    showall([], datapath='test.db')
-    delete(['NAME', 'wrong_NAME'], datapath='test.db')
-    show(['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
-    os.remove('test.db')
+
+    def main():
+        db_creator('test.db')
+        create(args=['NAME', 'SOURCE', 'DEST', '...'], datapath='test.db')
+        create(args=['TEST', 'SOURCE', 'DEST', '...'], datapath='test.db')
+        update(args=['NAME'], datapath='test.db')
+        show(args=['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
+        showall(datapath='test.db')
+        delete(args=['NAME', 'wrong_NAME'], datapath='test.db')
+        show(args=['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
+
+    try:
+        main()
+    except sqlite3.OperationalError:
+        os.remove('test.db')
+        main()

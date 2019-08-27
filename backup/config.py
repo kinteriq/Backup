@@ -22,6 +22,6 @@ custom_datapath = ''
 
 # Default path to .json file is the directory with this config file
 __default_datapath = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), 'shortcuts.json'))
+    os.path.join(os.path.dirname(__file__), 'shortcuts.db'))
 
 DATAPATH = custom_datapath or __default_datapath

@@ -66,7 +66,7 @@ class CommandLine:
         Command().valid[command](args=self.arguments, data=self.data)
         return tuple(self.arguments)
 
-    def backup_args(self):
+    def backup_args(self):  # TODO don't need any message
         """
         Check if every argument is a saved shortcut;
             if not: raise SystemExit
@@ -138,7 +138,7 @@ class Validators:
             sys.exit(MSG['invalid_shortcut'] + shortcut)
 
     @db_connect
-    def data_not_empty(db_cursor):
+    def data_not_empty(args, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS (SELECT * FROM shortcuts)''')
         exists = selection.fetchone()[0]

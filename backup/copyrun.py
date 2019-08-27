@@ -17,16 +17,8 @@
 
 import shutil
 
-import file_handle
-
-
-def copy_all(shortcuts, path):
-    for shortcut in shortcuts:
-        paths = file_handle.get_shortcut_paths(shortcut=shortcut,
-                                               datapath=path)
-        source = paths['source']
-        destinations = paths['destination']
-        for d_path in destinations:
-            print(f'Copying {source} to {d_path}...')
-            shutil.copytree(source, d_path)
-    return True
+def call(shortcuts, path):
+    # TODO make it update files
+    # for shortcut in shortcuts:
+    #     
+    pass

@@ -18,22 +18,21 @@ import sys
 
 from commands import read_from_command_line, execute_command
 import config
-import runner
-import file_handle
+import copyrun
+import shortcuts
 
 
-def main(datapath) -> str:
-    data = file_handle.retreive(datapath)
-    command, *params = read_from_command_line(data=data)
+# TODO help cmd
+def main(datapath):
+    try:
+        shortcuts.db_creator(datapath)
+    except:
+        pass
+    command, *params = read_from_command_line(datapath=datapath)
     if not command:
-        runner.copy_all(shortcuts=params, path=datapath)
+        copyrun.call(shortcuts=params, path=datapath)
         sys.exit('BACKUP IS FINISHED.')
-    message, altered_data = execute_command(command=command,
-                                            params=params,
-                                            data=data)
-    if altered_data:
-        file_handle.write_to_file(data=altered_data, path=datapath)
-    return message
+    execute_command(command=command, params=params, datapath=datapath)
 
 
 if __name__ == '__main__':

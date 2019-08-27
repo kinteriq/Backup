@@ -30,14 +30,13 @@ COMMANDS = {
 }
 
 
-def read_from_command_line(data) -> list:
+def read_from_command_line(datapath) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
-    valid_args = check.CommandLine(data=data,
+    valid_args = check.CommandLine(datapath=datapath,
                                    arguments=args,
                                    all_commands=COMMANDS).complete()
     return valid_args
 
 
-def execute_command(command, params, data) -> tuple:
-    message, altered_data = COMMANDS[command](arguments=params, data=data)
-    return (message, altered_data)
+def execute_command(command, params, datapath):
+    COMMANDS[command](args=params, datapath=datapath)
