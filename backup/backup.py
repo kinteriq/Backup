@@ -37,4 +37,4 @@ def main(datapath):
 
 if __name__ == '__main__':
     datapath = config.DATAPATH
-    print(main(datapath=datapath))
+    main(datapath=datapath)
