@@ -15,10 +15,10 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import sys
+import sqlite3
 
 from commands import read_from_command_line, execute_command
 import config
-import copyrun
 import shortcuts
 
 
@@ -26,12 +26,9 @@ import shortcuts
 def main(datapath):
     try:
         shortcuts.db_creator(datapath)
-    except:
+    except sqlite3.OperationalError:
         pass
     command, *params = read_from_command_line(datapath=datapath)
-    if not command:
-        copyrun.call(shortcuts=params, path=datapath)
-        sys.exit('BACKUP IS FINISHED.')
     execute_command(command=command, params=params, datapath=datapath)
 
 

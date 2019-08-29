@@ -70,33 +70,3 @@ def _perm_to_replace(file):
     elif ask == 'y':
         return (True, _all)
     return (False, _all)
-
-
-if __name__ == '__main__':
-    from tests.fixtures import PATH
-
-    def main():
-        connection = sqlite3.connect(PATH)
-        cursor = connection.cursor()
-        cursor.execute('''CREATE TABLE shortcuts
-            (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
-        source = os.path.join(os.getcwd(), 'backup')
-        destination = os.path.join(os.getcwd(), 'testBackup')
-        DATA_1 = ('testing', source, destination)
-        cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', DATA_1)
-        connection.commit()
-        connection.close()
-        call(['testing'], PATH)
-
-        os.remove(PATH)
-        # TODO change
-        try:
-            os.rmdir(destination)
-        except OSError as e:
-            print(e)
-
-    try:
-        main()
-    except sqlite3.OperationalError:
-        os.remove(PATH)
-        main()

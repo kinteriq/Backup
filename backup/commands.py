@@ -18,6 +18,7 @@
 import sys
 
 import check
+import copyrun
 import shortcuts
 
 COMMANDS = {
@@ -39,4 +40,7 @@ def read_from_command_line(datapath) -> list:
 
 
 def execute_command(command, params, datapath):
+    if not command:
+        copyrun.call(shortcuts=params, path=datapath)
+        sys.exit('BACKUP IS FINISHED.')
     COMMANDS[command](args=params, datapath=datapath)

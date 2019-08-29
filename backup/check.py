@@ -14,11 +14,11 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import os
 import sqlite3
 import sys
 
-from shortcuts import db_connect
+from database import db_connect
 
 
 MSG = {
@@ -28,6 +28,7 @@ MSG = {
     'created_shortcut_exists':
     'Shortcut is already in the database. Try "update" command.',
     'no_data': 'There are no shortcuts saved. Try "create" or "help" command.',
+    'wrong_path': 'Directory does not exist:\n\t'
 }
 
 
@@ -151,10 +152,9 @@ class Validators:
         sys.exit(MSG['invalid_cmd'] + command)
 
 
-class DirPaths:
-    pass
-
-if __name__ == '__main__':
-    Command().valid['create'](args=['create','NAME','a','b'], data='test.db')
-    Command().valid['delete'](args=['delete','NAME'], data='test.db')
-    Command().valid['show'](args=['show','TEST','NAME'], data='test.db')
+def dir_path(path):
+    if not os.path.exists(path):
+        sys.exit(MSG['wrong_path'] + path)
+    if path.startswith('~'):
+        return os.path.join(os.path.expanduser('~'), path[2:])
+    return path
