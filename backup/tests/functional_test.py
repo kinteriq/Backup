@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from .context import backup  # TODO make unittest work
 from backup.commands import read_from_command_line, execute_command
-from .fixtures import PATH, SHORTCUT_NAMES
+from .fixtures import PATH, SHORTCUT_NAMES, SOURCE, DESTINATION, ANOTHER_DESTINATION
 
 NO_ARGS = ['backup.py']
 
@@ -14,12 +14,10 @@ SHORTCUT_1 = SHORTCUT_NAMES[0]
 
 SHORTCUT_2 = SHORTCUT_NAMES[1]
 
-CREATE_ARGS = [
-    'backup.py', 'create', SHORTCUT_1, 'pathfrom', 'path/to_1', 'path/to_2'
-]
+CREATE_ARGS = ['backup.py', 'create', SHORTCUT_1, SOURCE, DESTINATION]
 
 MISSPELLED_CREATE_COMMAND_ARGS = [
-    'backup.py', 'crete', 'test', 'pathfrom', 'path/to_1', 'path/to_2'
+    'backup.py', 'crete', 'test', SOURCE, DESTINATION, ANOTHER_DESTINATION
 ]
 
 SHOW_ARGS = ['backup.py', 'show', SHORTCUT_1]
@@ -27,7 +25,7 @@ SHOW_ARGS = ['backup.py', 'show', SHORTCUT_1]
 UPDATE_ARGS = ['backup.py', 'update', SHORTCUT_1]
 
 ANOTHER_CREATE_ARGS = [
-    'backup.py', 'create', SHORTCUT_2, 'pathfrom', 'path/to_1', 'path/to_2'
+    'backup.py', 'create', SHORTCUT_2, SOURCE, DESTINATION, ANOTHER_DESTINATION
 ]
 
 SHOWALL_ARGS = ['backup.py', 'showall']
@@ -80,9 +78,9 @@ class TestCommandLine(unittest.TestCase):
     def test_receive_show_command(self):
         assert stdout
 
-    # Sees that the source path is wrong;
-    #   Changes the source path
-    user_input = ['changed/path', '']
+    # Sees that the destination path is wrong;
+    #   Changes the destination path
+    user_input = ['', ANOTHER_DESTINATION]
 
     @patch('builtins.input', side_effect=user_input)
     def test_receive_update_command(self, user_input):
@@ -99,10 +97,10 @@ class TestCommandLine(unittest.TestCase):
         table = sqlite3.connect(PATH).cursor().execute(
             '''SELECT * FROM shortcuts''')
         for row in table:
-            assert row[1] == 'changed/path'
+            assert row[2] == ANOTHER_DESTINATION
 
     # User creates another shortcut and checks that they are both saved
-    # with 'showall' command
+    #   with 'showall' command
     @unittest.skip('FINISH')
     def test_receive_showall_command(self):
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
@@ -135,8 +133,8 @@ class TestCommandLine(unittest.TestCase):
                         datapath=PATH)
         command, *params = patched_read_from_command_line(args=BACKUP_ARGS,
                                                           path=PATH)
-        # TODO change???
-        self.assertIsNone(command)
+        with self.assertRaises(SystemExit):
+            execute_command(command=command, params=params, datapath=PATH)
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):

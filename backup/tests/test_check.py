@@ -94,3 +94,8 @@ def test_valid_command():
     Test a function returns a non-empty tuple upon receiving a valid command
     """
     assert len(VALID_CMD.complete()) >= 1
+
+
+def test_wrong_dir_path():
+    with pytest.raises(SystemExit):
+        check.dir_path('/test_backup_wrong_filepath/')

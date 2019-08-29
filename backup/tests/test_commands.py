@@ -6,7 +6,7 @@ import sys
 from .context import backup
 from backup.commands import read_from_command_line, execute_command
 from backup.check import MSG as error_message
-from .fixtures import PATH, SHORTCUT_NAMES
+from .fixtures import PATH, SHORTCUT_NAMES, SOURCE, DESTINATION
 
 EMPTY_ARGS = []
 
@@ -16,7 +16,7 @@ SHOWALL_ARGS = ['backup.py', 'showall']
 
 BACKUP_ARGS = ['backup.py'] + list(SHORTCUT_NAMES)
 
-VALID_CMD_ARGS = ['backup.py', 'create', 'NAME', 'from/path', 'to/path']
+VALID_CMD_ARGS = ['backup.py', 'create', 'NAME', SOURCE, DESTINATION]
 
 
 class TestReadFromCommandLine():
@@ -59,7 +59,7 @@ class TestReadFromCommandLine():
     def test_got_valid_command(self, monkeypatch):
         monkeypatch.setattr(sys, 'argv', VALID_CMD_ARGS)
         result = read_from_command_line(datapath=PATH)
-        assert result == ('create', 'NAME', 'from/path', 'to/path')
+        assert result == ('create', 'NAME', SOURCE, DESTINATION)
 
     def test_execute_create_command(self):
         command, *params = VALID_CMD_ARGS[1:]

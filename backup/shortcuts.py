@@ -14,43 +14,26 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import functools
 import os
 import sqlite3
 
-
-def db_creator(datapath):
-    connection = sqlite3.connect(datapath)
-    cursor = connection.cursor()
-    cursor.execute('''CREATE TABLE shortcuts
-        (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
-    connection.commit()
-    connection.close()
-
-
-def db_connect(func):
-    """
-    Manages the connection with the database which is in the 'datapath' file.
-    """
-    @functools.wraps(func)
-    def wrapper(datapath, args=tuple()):
-        connection = sqlite3.connect(datapath)
-        cursor = connection.cursor()
-        func(args, cursor)
-        connection.commit()
-        connection.close()
-
-    return wrapper
+import check
+from database import db_connect, db_creator
 
 
 @db_connect
 def create(arguments, db_cursor):
     shortcut, source, *destinations = arguments
-    # TODO:
-    # check source path
-    # check destinations
-    format_destinations = ', '.join(destinations)
-    values = (shortcut, source, format_destinations)
+    # TODO: refactor
+    checked_source = check.dir_path(source)
+    checked_destinations = []
+    for d in destinations:
+        checked_d = check.dir_path(os.path.split(d)[0])
+        checked_destinations.append(
+            os.path.join(checked_d,
+                         os.path.split(d)[1]))
+    format_destinations = ', '.join(checked_destinations)
+    values = (shortcut, checked_source, format_destinations)
     db_cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', values)
     print(f'Shortcut is created: "{shortcut}".\n')
 
@@ -63,15 +46,20 @@ def update(arguments, db_cursor):
         destinations = input(
             '- Destinations ["enter" to skip]:\n'
             '*use commas to separate: /user/docs/, /user/temps/\n')
-        # TODO:
-        # check source path
-        # check destinations
+        # TODO: refactor
         if source:
+            checked_source = check.dir_path(source)
             db_cursor.execute('''UPDATE shortcuts SET source = ?''',
-                              (source, ))
+                              (checked_source, ))
         if destinations:
+            checked_destinations = []
+            for d in destinations.split(','):
+                checked_d = check.dir_path(os.path.split(d)[0])
+                checked_destinations.append(
+                    os.path.join(checked_d,
+                                 os.path.split(d)[1]))
             db_cursor.execute('''UPDATE shortcuts SET destinations = ?''',
-                              (destinations, ))
+                              tuple(checked_destinations))
     print('Updated successfully.\n')
 
 
@@ -104,22 +92,3 @@ def showall(arguments, db_cursor):
     for row in selection:
         print('\t' + row[0])
     print()
-
-
-if __name__ == '__main__':
-
-    def main():
-        db_creator('test.db')
-        create(args=['NAME', 'SOURCE', 'DEST', '...'], datapath='test.db')
-        create(args=['TEST', 'SOURCE', 'DEST', '...'], datapath='test.db')
-        update(args=['NAME'], datapath='test.db')
-        show(args=['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
-        showall(datapath='test.db')
-        delete(args=['NAME', 'wrong_NAME'], datapath='test.db')
-        show(args=['NAME', 'wrong_NAME', 'TEST'], datapath='test.db')
-
-    try:
-        main()
-    except sqlite3.OperationalError:
-        os.remove('test.db')
-        main()

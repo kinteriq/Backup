@@ -2,11 +2,9 @@ import os
 import pytest
 import sqlite3
 
-from .fixtures import PATH
+from .fixtures import PATH, SOURCE, DESTINATION
 from backup import copyrun
 
-SOURCE = os.path.join(os.getcwd(), 'backup')
-DESTINATION = destination = os.path.join(os.getcwd(), 'testBackup')
 DATA_1 = ('testing', SOURCE, DESTINATION)
 
 
