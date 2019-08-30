@@ -41,6 +41,11 @@ def read_from_command_line(datapath) -> list:
 
 def execute_command(command, params, datapath):
     if not command:
-        copyrun.call(shortcuts=params, path=datapath)
-        sys.exit('BACKUP IS FINISHED.')
+        try:
+            copyrun.call(shortcuts=params, path=datapath)
+            sys.exit('BACKUP IS FINISHED.')
+        except KeyboardInterrupt:
+            sys.exit('\n\nEXIT.')
+        except EOFError:
+            sys.exit('\n\nEXIT.')
     COMMANDS[command](args=params, datapath=datapath)

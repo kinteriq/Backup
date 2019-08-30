@@ -31,3 +31,8 @@ def test_copyall_ok():
 @pytest.mark.skip('FINISH')
 def test_copy_with_replacements():
     finish
+
+
+@pytest.mark.skip('FINISH')
+def test_copy_without_any_replacements():
+    finish

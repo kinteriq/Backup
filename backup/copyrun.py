@@ -20,7 +20,6 @@ import sqlite3
 
 
 def call(shortcuts, path):
-    # TODO EOFError KeyboardInterrupt
     for shortcut in shortcuts:
         con = sqlite3.connect(path)
         selection = con.cursor().execute(
@@ -34,39 +33,57 @@ def _copy_manager(table):
         source = row[1]
         destinations = row[2].split(', ')
         for d in destinations:
-            _copy(source, d, False)
+            _copy(source, d, False, False)
 
 
-def _copy(source, destination, replace_all):
+def _copy(source, destination, replace_all, replace_nothing):
     if not os.path.exists(destination):
         os.mkdir(destination)
     for file in os.listdir(source):
         path = os.path.join(source, file)
         if os.path.isdir(path):
             destination_dir = os.path.join(destination, file)
-            replace_all = _copy(path, destination_dir, replace_all)
+            replace_all, replace_nothing = _copy(path, destination_dir,
+                                                 replace_all, replace_nothing)
         elif os.path.isfile(path):
             destination_file = os.path.join(destination, file)
-            # TODO divide
-            if os.path.exists(destination_file):
-                if replace_all:
-                    pass
-                else:
-                    replace, replace_all = _perm_to_replace(destination_file)
-                    if not replace:
-                        continue
+            replace_one, replace_all, replace_nothing = _replace_manager(
+                destination_file, replace_nothing, replace_all)
+            if replace_nothing:
+                continue
+            if replace_all:
+                pass
+            elif not replace_one:
+                continue
             print(f'Copying:\n\t{path}\n\t-->{destination_file}')
             shutil.copyfile(path, destination_file)
-    return replace_all
+    return (replace_all, replace_nothing)
+
+
+def _replace_manager(destination, replace_nothing, replace_all):
+    replace_one = False
+    if os.path.exists(destination):
+        if replace_nothing or replace_all:
+            return (replace_one, replace_all, replace_nothing)
+        else:
+            replace_one, replace_all, replace_nothing = _perm_to_replace(
+                destination)
+    return (replace_one, replace_all, replace_nothing)
 
 
 def _perm_to_replace(file):
-    # TODO: add don't replace all
+    _one = False
     _all = False
-    ask = input(f'\nFile already exists:\n"{file}"\nReplace (y/all)? ')
+    _all_no = False
+    ask = input(f'\nFile already exists:\n"{file}"\nReplace (y/all/nothing)? ')
     if ask == 'all':
+        _one = True
         _all = True
-        return (True, _all)
+        return (_one, _all, _all_no)
+    elif ask == 'nothing':
+        _all_no = True
+        return (_one, _all, _all_no)
     elif ask == 'y':
-        return (True, _all)
-    return (False, _all)
+        _one = True
+        return (_one, _all, _all_no)
+    return (_one, _all, _all_no)

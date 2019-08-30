@@ -31,9 +31,12 @@ showall          | fetch all shortcuts from the database
 create _shortcut-name source-path destination-path_
 - __shortcut-name__: any name you would like
 - __source-path__: path to the directory which you need to copy from
-- __destination-path__: path to the directory you need to copy to (can enter several paths separated by space)
+- __destination-path__\*\*: path to the directory you need to copy to (can enter several paths separated by space)
 
         python3 backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
+
+\*\* _Add separator at the end if the directory already exists,\
+otherwise, there should be no separator at the end of the path._
 
 ### __delete__:
 delete _shortcut-name_
@@ -42,14 +45,14 @@ delete _shortcut-name_
          python3 backup.py delete documents
          python3 backup.py delete photos documents
 
-### __update__\*\*:
+### __update__\*\*\*:
 update _shortcut-name_
 - __shortcut-name__: name (or names separated by space) that you want to update
 
          python3 backup.py update documents
          python3 backup.py update photos documents
 
-\*\* _You will be asked to change source and/or desination paths in the interactive mode;\
+\*\*\* _You will be asked to change source and/or destination paths in the interactive mode;\
 In order to keep the current information simply press ENTER to skip._
 
 ### __show__:
