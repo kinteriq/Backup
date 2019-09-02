@@ -18,11 +18,11 @@ import os
 import sqlite3
 
 import check
-from database import db_connect, db_creator
+from database import db_connect
 
 
 @db_connect
-def create(arguments, db_cursor):
+def create(arguments, datapath, db_cursor=None):
     shortcut, source, *destinations = arguments
     # TODO: refactor
     checked_source = check.dir_path(source)
@@ -39,7 +39,7 @@ def create(arguments, db_cursor):
 
 
 @db_connect
-def update(arguments, db_cursor):
+def update(arguments, datapath, db_cursor=None):
     for shortcut in arguments:
         print(f'Update "{shortcut}"\n')
         source = input('- Source ["enter" to skip]:\n')
@@ -64,15 +64,22 @@ def update(arguments, db_cursor):
 
 
 @db_connect
-def delete(arguments, db_cursor):
+def delete(arguments, datapath, db_cursor=None):
+    count = 0
+    deleted = []
     for shortcut in arguments:
         db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
                           (shortcut, ))
-    print('Deleted successfully.\n')  # TODO add count and list
+        count += 1
+        deleted.append(shortcut)
+
+    print(f'Deleted successfully {count} shortcut(s):')
+    for shortcut in deleted:
+        print('\t' + shortcut)
 
 
 @db_connect
-def show(arguments, db_cursor):
+def show(arguments, datapath, db_cursor=None):
     for shortcut in arguments:
         selection = db_cursor.execute(
             '''SELECT * FROM shortcuts WHERE name = ? ORDER BY name''',
@@ -85,7 +92,7 @@ def show(arguments, db_cursor):
 
 
 @db_connect
-def showall(arguments, db_cursor):
+def showall(arguments, datapath, db_cursor=None):
     selection = db_cursor.execute(
         '''SELECT name FROM shortcuts ORDER BY name''')
     print('SAVED NAMES:')

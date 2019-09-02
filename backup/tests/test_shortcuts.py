@@ -65,6 +65,11 @@ def test_delete_shortcut():
 
 
 @pytest.mark.skip('FINISH')
+def test_delete_many_shortcuts():
+    assert fail
+
+
+@pytest.mark.skip('FINISH')
 def test_show_shortcut():
     assert fail
 

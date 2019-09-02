@@ -19,13 +19,13 @@ import sqlite3
 
 from commands import read_from_command_line, execute_command
 import config
-import shortcuts
+import database
 
 
 # TODO help cmd
 def main(datapath):
     try:
-        shortcuts.db_creator(datapath)
+        database.db_creator(datapath)
     except sqlite3.OperationalError:
         pass
     command, *params = read_from_command_line(datapath=datapath)

@@ -4,39 +4,11 @@ import os
 import sqlite3
 
 from backup import check
-from .fixtures import PATH, SHORTCUT_NAMES
+from .fixtures import PATH
+
+SHORTCUT_NAMES = ('TEST_1', 'TEST_2')
 
 COMMANDS = ('create', 'delete', 'show')
-
-INVALID_SHORTCUTS = check.CommandLine(datapath=PATH,
-                                      arguments=['wrong1', 'wrong2', 'wrong3'],
-                                      all_commands=COMMANDS)
-
-BACKUP_ARGS = check.CommandLine(datapath=PATH,
-                                arguments=SHORTCUT_NAMES,
-                                all_commands=COMMANDS)
-
-INVALID_CMD = check.CommandLine(datapath=PATH,
-                                arguments=['messed', 'up'],
-                                all_commands=COMMANDS)
-
-INVALID_CMD_ARGS = check.CommandLine(datapath=PATH,
-                                     arguments=['showall', 'wrong_name'],
-                                     all_commands=COMMANDS)
-
-VALID_CMD = check.CommandLine(
-    datapath=PATH,
-    arguments=['create', 'NAME', 'from/path', 'to/path'],
-    all_commands=COMMANDS)
-
-EMPTY_CMD = check.CommandLine(datapath=PATH,
-                              arguments=[],
-                              all_commands=COMMANDS)
-
-SHORTCUT_EXISTS_CMD = check.CommandLine(
-    datapath=PATH,
-    arguments=['create', SHORTCUT_NAMES[0], 'from/path', 'to/path'],
-    all_commands=COMMANDS)
 
 
 def setup_module():
@@ -58,12 +30,15 @@ def teardown_module():
 
 def test_check_no_args():
     with pytest.raises(SystemExit):
-        EMPTY_CMD.complete()
+        check.CommandLine(datapath=PATH, arguments=[],
+                          all_commands=COMMANDS).complete()
 
 
 def test_check_invalid_shortcuts():
     with pytest.raises(SystemExit):
-        INVALID_SHORTCUTS.complete()
+        check.CommandLine(datapath=PATH,
+                          arguments=['wrong1', 'wrong2', 'wrong3'],
+                          all_commands=COMMANDS).complete()
 
 
 def test_check_valid_backup_args():
@@ -71,29 +46,44 @@ def test_check_valid_backup_args():
     If all shortcuts are valid - returns a tuple with valid args,
         where the first arg is None, and the rest - shortcut names.
     """
-    assert len(BACKUP_ARGS.complete()) >= 2
+    result = check.CommandLine(datapath=PATH,
+                               arguments=SHORTCUT_NAMES,
+                               all_commands=COMMANDS)
+
+    assert len(result.complete()) >= 2
 
 
 def test_check_invalid_command():
     with pytest.raises(SystemExit):
-        INVALID_CMD.complete()
+        check.CommandLine(datapath=PATH,
+                          arguments=['messed', 'up'],
+                          all_commands=COMMANDS).complete()
 
 
 def test_created_shortcut_exists():
     with pytest.raises(SystemExit):
-        SHORTCUT_EXISTS_CMD.complete()
+        check.CommandLine(
+            datapath=PATH,
+            arguments=['create', SHORTCUT_NAMES[0], '1/path', '2/path'],
+            all_commands=COMMANDS).complete()
 
 
 def test_invalid_command_args():
     with pytest.raises(SystemExit):
-        INVALID_CMD_ARGS.complete()
+        check.CommandLine(datapath=PATH,
+                          arguments=['show', 'wrong_name'],
+                          all_commands=COMMANDS).complete()
 
 
 def test_valid_command():
     """
     Test a function returns a non-empty tuple upon receiving a valid command
     """
-    assert len(VALID_CMD.complete()) >= 1
+    result = check.CommandLine(
+        datapath=PATH,
+        arguments=['create', 'NAME', 'from/path', 'to/path'],
+        all_commands=COMMANDS)
+    assert len(result.complete()) >= 1
 
 
 def test_wrong_dir_path():

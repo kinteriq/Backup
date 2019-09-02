@@ -29,13 +29,13 @@ def db_creator(datapath):
 
 def db_connect(func):
     """
-    Manages the connection with the database which is in the 'datapath' file.
+    Manages the connection with the database, which is in the 'datapath' file.
     """
     @functools.wraps(func)
     def wrapper(datapath, args=tuple()):
         connection = sqlite3.connect(datapath)
         cursor = connection.cursor()
-        func(args, cursor)
+        func(args, datapath=datapath, db_cursor=cursor)
         connection.commit()
         connection.close()
 

@@ -20,7 +20,6 @@ import sys
 
 from database import db_connect
 
-
 MSG = {
     'invalid_cmd': 'There is no such command (try "help"): ',
     'empty': 'Zero arguments provided.',
@@ -96,11 +95,10 @@ class Command:
                 Validators.shortcut(args=args[1], datapath=data)
             ]),
             'delete':
-            lambda args, data: all([
-                len(args) == 2,
-                Validators.shortcut(args=args[1], datapath=data)
+            lambda args, data: all([len(args) >= 2] + [
+                Validators.shortcut(args=arg, datapath=data)
+                for arg in args[1:]
             ]),
-            # TODO: show all that exist
             'show':
             lambda args, data: all([len(args) >= 2] + [
                 Validators.shortcut(args=arg, datapath=data)
@@ -121,7 +119,7 @@ class Validators:
         wrapper(args, datapath) -> func(db_cursor, args=tulple())
     """
     @db_connect
-    def created_shortcut_exists(shortcut, db_cursor):
+    def created_shortcut_exists(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
@@ -130,7 +128,7 @@ class Validators:
             sys.exit(MSG['created_shortcut_exists'])
 
     @db_connect
-    def shortcut(shortcut, db_cursor):
+    def shortcut(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
@@ -139,7 +137,7 @@ class Validators:
             sys.exit(MSG['invalid_shortcut'] + shortcut)
 
     @db_connect
-    def data_not_empty(args, db_cursor):
+    def data_not_empty(args, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS (SELECT * FROM shortcuts)''')
         exists = selection.fetchone()[0]
