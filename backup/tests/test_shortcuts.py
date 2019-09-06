@@ -1,3 +1,4 @@
+from io import StringIO
 import os
 import pytest
 import sqlite3
@@ -6,10 +7,21 @@ from unittest import mock
 from backup import shortcuts
 from .fixtures import PATH, SOURCE, DESTINATION, ANOTHER_DESTINATION
 
-CREATE_ARGS = ['NAME', SOURCE, DESTINATION, ANOTHER_DESTINATION]
-DELETE_ARGS = [CREATE_ARGS[0], 'wrong_NAME']
-SHOW_ARGS = [CREATE_ARGS[0], 'wrong_NAME']
-WRONG_PATH_ARGS = ['NAME', 'wrong_path', 'path']
+NAME = 'NAME-1'
+
+ANOTHER_NAME = 'NAME-2'
+
+CREATE_ARGS = [NAME, SOURCE, DESTINATION, ANOTHER_DESTINATION]
+
+ANOTHER_CREATE_ARGS = [ANOTHER_NAME, SOURCE, DESTINATION]
+
+DELETE_ARGS = [NAME, 'wrong_NAME']
+
+SHOW_ARGS = [NAME, 'wrong_NAME']
+
+SHOWALL_ARGS = [NAME, ANOTHER_NAME]
+
+WRONG_PATH_ARGS = [NAME, 'wrong_path', 'path']
 
 
 def setup_module():
@@ -69,11 +81,25 @@ def test_delete_many_shortcuts():
     assert fail
 
 
-@pytest.mark.skip('FINISH')
 def test_show_shortcut():
-    assert fail
+    destinations = ', '.join([DESTINATION, ANOTHER_DESTINATION])
+    expected_output = (f'NAME:\n\t{NAME}\n'
+                       f'SOURCE:\n\t{SOURCE}\n'
+                       f'DESTINATIONS:\n\t{destinations}\n\n')
+    connection = sqlite3.connect(PATH)
+    cursor = connection.cursor()
+    shortcuts.create(args=CREATE_ARGS, datapath=PATH)
+    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
+        shortcuts.show(args=SHOW_ARGS, datapath=PATH)
+        assert mock_output.getvalue() == expected_output
 
 
-@pytest.mark.skip('FINISH')
 def test_showall():
-    assert fail
+    expected_output = f'SAVED NAMES:\n\t{NAME}\n\t{ANOTHER_NAME}\n\n'
+    connection = sqlite3.connect(PATH)
+    cursor = connection.cursor()
+    # shortcuts.create(args=CREATE_ARGS, datapath=PATH) # TODO independent
+    shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=PATH)
+    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
+        shortcuts.showall(args=SHOWALL_ARGS, datapath=PATH)
+        assert mock_output.getvalue() == expected_output

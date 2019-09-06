@@ -29,16 +29,19 @@ def teardown_module():
 
 
 def test_check_no_args():
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         check.CommandLine(datapath=PATH, arguments=[],
                           all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['empty'])
 
 
 def test_check_invalid_shortcuts():
-    with pytest.raises(SystemExit):
+    args = ['wrong1', 'wrong2', 'wrong3']
+    with pytest.raises(SystemExit) as e:
         check.CommandLine(datapath=PATH,
-                          arguments=['wrong1', 'wrong2', 'wrong3'],
+                          arguments=args,
                           all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['invalid_cmd'] + args[0])
 
 
 def test_check_valid_backup_args():
@@ -54,25 +57,30 @@ def test_check_valid_backup_args():
 
 
 def test_check_invalid_command():
-    with pytest.raises(SystemExit):
+    command = ['messed', 'up']
+    with pytest.raises(SystemExit) as e:
         check.CommandLine(datapath=PATH,
-                          arguments=['messed', 'up'],
+                          arguments=command,
                           all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['invalid_cmd'] + command[0])
 
 
 def test_created_shortcut_exists():
-    with pytest.raises(SystemExit):
+    with pytest.raises(SystemExit) as e:
         check.CommandLine(
             datapath=PATH,
             arguments=['create', SHORTCUT_NAMES[0], '1/path', '2/path'],
             all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['created_shortcut_exists'])
 
 
-def test_invalid_command_args():
-    with pytest.raises(SystemExit):
+def test_invalid_show_command_args():
+    name = 'wrong_name'
+    with pytest.raises(SystemExit) as e:
         check.CommandLine(datapath=PATH,
-                          arguments=['show', 'wrong_name'],
+                          arguments=['show', name],
                           all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['invalid_shortcut'] + name)
 
 
 def test_valid_command():
@@ -87,5 +95,7 @@ def test_valid_command():
 
 
 def test_wrong_dir_path():
-    with pytest.raises(SystemExit):
-        check.dir_path('/test_backup_wrong_filepath/')
+    path = '/test_backup_wrong_filepath/'
+    with pytest.raises(SystemExit) as e:
+        check.dir_path(path)
+    assert e.exconly().endswith(check.MSG['wrong_path'] + path)
