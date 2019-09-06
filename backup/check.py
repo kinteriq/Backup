@@ -21,17 +21,20 @@ import sys
 from database import db_connect
 
 MSG = {
-    'invalid_cmd': 'There is no such command (try "help"): ',
+    'invalid_cmd': 'No such command (try "help"): ',
     'empty': 'Zero arguments provided.',
-    'invalid_shortcut': 'There is no such shortcut saved: ',
+    'invalid_shortcut': 'No such shortcut saved: ',
     'created_shortcut_exists':
     'Shortcut is already in the database. Try "update" command.',
-    'no_data': 'There are no shortcuts saved. Try "create" or "help" command.',
+    'no_data': 'No shortcuts saved. Try "create" or "help" command.',
     'wrong_path': 'Directory does not exist:\n\t'
 }
 
 
 class CommandLine:
+    """
+    Check all arguments in command line are correct.
+    """
     def __init__(self, datapath, arguments, all_commands):
         self.data = datapath
         self.arguments = arguments
@@ -55,6 +58,16 @@ class CommandLine:
         if not self.arguments:
             sys.exit(MSG['empty'])
 
+    def backup_args(self):
+        """
+        Check if every argument is a saved shortcut;
+            if not: raise SystemExit
+            else: return tuple with valid arg
+        """
+        for arg in self.arguments:
+            Validate.shortcut(args=arg, datapath=self.data)
+        return (None, ) + tuple(self.arguments)
+
     def command_args(self):
         """
         Check if the command is valid;
@@ -62,63 +75,44 @@ class CommandLine:
             else: return tuple with valid arg
         """
         command = self.arguments[0]
-        Validators.command(available_cmds=self.commands, command=command)
-        Command().valid[command](args=self.arguments, data=self.data)
+        Validate.command(available_cmds=self.commands, command=command)
+        Validate.cmd_args[command](args=self.arguments, data=self.data)
         return tuple(self.arguments)
 
-    def backup_args(self):  # TODO don't need any message
-        """
-        Check if every argument is a saved shortcut;
-            if not: raise SystemExit
-            else: return tuple with valid arg
-        """
-        for arg in self.arguments:
-            Validators.shortcut(args=arg, datapath=self.data)
-        return (None, ) + tuple(self.arguments)
 
+class Validate:
+    cmd_args = {
+        'create':
+        lambda args, data: all([
+            len(args) >= 4,
+            Validate.created_shortcut_exists(args=args[1], datapath=data)
+        ]),
+        'update':
+        lambda args, data: all(
+            [len(args) == 2,
+             Validate.shortcut(args=args[1], datapath=data)]),
+        'delete':
+        lambda args, data: all([len(args) >= 2] + [
+            Validate.shortcut(args=arg, datapath=data) for arg in args[1:]
+        ]),
+        'show':
+        lambda args, data: all([len(args) >= 2] + [
+            Validate.shortcut(args=arg, datapath=data) for arg in args[1:]
+        ]),
+        'showall':
+        lambda args, data: all([
+            len(args) == 1,
+            Validate.data_not_empty(datapath=data), args[0] == 'showall'
+        ]),
+    }
 
-class Command:
-    """
-    Check that the command has correct arguments;
-        if not: raise SystemExit with the relevant message.
-    """
-    def __init__(self):
-        self.valid = {
-            'create':
-            lambda args, data: all([
-                len(args) >= 4,
-                Validators.created_shortcut_exists(args=args[1], datapath=data)
-            ]),
-            'update':
-            lambda args, data: all([
-                len(args) == 2,
-                Validators.shortcut(args=args[1], datapath=data)
-            ]),
-            'delete':
-            lambda args, data: all([len(args) >= 2] + [
-                Validators.shortcut(args=arg, datapath=data)
-                for arg in args[1:]
-            ]),
-            'show':
-            lambda args, data: all([len(args) >= 2] + [
-                Validators.shortcut(args=arg, datapath=data)
-                for arg in args[1:]
-            ]),
-            'showall':
-            lambda args, data: all([
-                len(args) == 1,
-                Validators.data_not_empty(datapath=data), args[0] == 'showall'
-            ]),
-        }
+    def command(command, available_cmds):
+        if command in available_cmds:
+            return True
+        sys.exit(MSG['invalid_cmd'] + command)
 
-
-class Validators:
-    # TODO: something's wrong!
-    """
-    db_connect:
-        wrapper(args, datapath) -> func(db_cursor, args=tulple())
-    """
     @db_connect
+    # TODO should return True
     def created_shortcut_exists(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
@@ -128,6 +122,7 @@ class Validators:
             sys.exit(MSG['created_shortcut_exists'])
 
     @db_connect
+    # TODO should return True
     def shortcut(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
@@ -137,17 +132,16 @@ class Validators:
             sys.exit(MSG['invalid_shortcut'] + shortcut)
 
     @db_connect
+    # TODO should return True
     def data_not_empty(args, datapath, db_cursor):
-        selection = db_cursor.execute(
-            '''SELECT EXISTS (SELECT * FROM shortcuts)''')
-        exists = selection.fetchone()[0]
-        if not exists:
+        try:
+            selection = db_cursor.execute(
+                '''SELECT EXISTS (SELECT * FROM shortcuts)''')
+            exists = selection.fetchone()[0]
+            if not exists:
+                sys.exit(MSG['no_data'])
+        except sqlite3.OperationalError:
             sys.exit(MSG['no_data'])
-
-    def command(command, available_cmds):
-        if command in available_cmds:
-            return True
-        sys.exit(MSG['invalid_cmd'] + command)
 
 
 def dir_path(path):
