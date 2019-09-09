@@ -75,8 +75,8 @@ class CommandLine:
         """
         command = self.arguments[0]
         Validate.command(available_cmds=self.commands, command=command)
-        Validate.cmd_args[command](args=self.arguments, data=self.data)
-        return tuple(self.arguments)
+        if Validate.cmd_args[command](args=self.arguments, data=self.data):
+            return tuple(self.arguments)
 
 
 class Validate:
@@ -84,19 +84,23 @@ class Validate:
         'create':
         lambda args, data: all([
             len(args) >= 4,
-            Validate.created_shortcut_exists(args=args[1], datapath=data)
+            not Validate.created_shortcut_exists(args=args[1], datapath=data)
         ]),
         'update':
         lambda args, data: all(
             [len(args) == 2,
              Validate.shortcut(args=args[1], datapath=data)]),
         'delete':
-        lambda args, data: all([len(args) >= 2] + [
-            Validate.shortcut(args=arg, datapath=data) for arg in args[1:]
+        lambda args, data: any([
+            len(args) >= 2,
+            Validate.shortcut(args=args[1], datapath=data)
+            if len(args) == 2 else False
         ]),
         'show':
-        lambda args, data: all([len(args) >= 2] + [
-            Validate.shortcut(args=arg, datapath=data) for arg in args[1:]
+        lambda args, data: any([
+            len(args) >= 2,
+            Validate.shortcut(args=args[1], datapath=data)
+            if len(args) == 2 else False
         ]),
         'showall':
         lambda args, data: all([
@@ -118,7 +122,7 @@ class Validate:
         exists = selection.fetchone()[0]
         if exists:
             raise SystemExit(MSG['created_shortcut_exists'])
-        return True
+        return False
 
     @db_connect
     def shortcut(shortcut, datapath, db_cursor):
@@ -138,9 +142,10 @@ class Validate:
             exists = selection.fetchone()[0]
             if not exists:
                 raise SystemExit(MSG['no_data'])
+            return True
+
         except sqlite3.OperationalError:
             raise SystemExit(MSG['no_data'])
-        return True
 
 
 def dir_path(path):

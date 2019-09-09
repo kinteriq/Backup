@@ -94,9 +94,9 @@ class TestCommandLine(unittest.TestCase):
 
     # Checks that the shortcut was saved by entering 'show {shortcut}' command
     def test_receive_show_command(self):
-        expected_output = (f'NAME:\n\t{SHORTCUT_1}\n'
-                           f'SOURCE:\n\t{SOURCE}\n'
-                           f'DESTINATIONS:\n\t{DESTINATION}\n\n')
+        expected_output = (f'NAME: {SHORTCUT_1}\n'
+                           f'  SOURCE:\n    {SOURCE}\n'
+                           f'  DESTINATIONS:\n     {DESTINATION}\n\n')
 
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
         execute_command(command=create_1[0],

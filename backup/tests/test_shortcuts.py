@@ -64,15 +64,15 @@ def test_delete_many_shortcuts(empty_db_cursor, PATH):
     shortcuts.delete(args=DELETE_MANY_ARGS, datapath=PATH)
     for name in DELETE_MANY_ARGS:
         selection = empty_db_cursor.execute(
-            '''SELECT * FROM shortcuts WHERE name = ?''', (name,))
+            '''SELECT * FROM shortcuts WHERE name = ?''', (name, ))
         assert selection.fetchall() == []
 
 
 def test_show_shortcut(empty_db_cursor, PATH):
     destinations = ', '.join([DESTINATION, ANOTHER_DESTINATION])
-    expected_output = (f'NAME:\n\t{NAME}\n'
-                       f'SOURCE:\n\t{SOURCE}\n'
-                       f'DESTINATIONS:\n\t{destinations}\n\n')
+    expected_output = (f'NAME: {NAME}\n'
+                       f'  SOURCE:\n    {SOURCE}\n'
+                       f'  DESTINATIONS:\n     {destinations}\n\n')
     shortcuts.create(args=CREATE_ARGS, datapath=PATH)
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.show(args=SHOW_ARGS, datapath=PATH)

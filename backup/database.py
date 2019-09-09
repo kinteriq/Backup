@@ -27,7 +27,7 @@ def db_creator(datapath):
     connection.close()
 
 
-def db_connect(func):
+def db_connect(func):   # TODO @db_connect(datapath)
     """
     Manages the connection with the database, which is in the 'datapath' file.
     """
@@ -35,8 +35,8 @@ def db_connect(func):
     def wrapper(datapath, args=tuple()):
         connection = sqlite3.connect(datapath)
         cursor = connection.cursor()
-        func(args, datapath=datapath, db_cursor=cursor)
+        result = func(args, datapath=datapath, db_cursor=cursor)
         connection.commit()
         connection.close()
-
+        return result
     return wrapper

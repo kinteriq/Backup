@@ -69,9 +69,13 @@ def delete(arguments, datapath, db_cursor=None):
     count = 0
     deleted = []
     for shortcut in arguments:
+        select_shortcut = db_cursor.execute(
+            f'''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
+        found_shortcut = select_shortcut.fetchone()
+        if found_shortcut is None:
+            continue
         db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
                           (shortcut, ))
-        # TODO dont count shortcuts which are not in db
         count += 1
         deleted.append(shortcut)
 
@@ -88,9 +92,9 @@ def show(arguments, datapath, db_cursor=None):
             (shortcut, ))
         for row in selection:
             name, source, destinations = row[0], row[1], row[2]
-            print(f'NAME:\n\t{name}\n'
-                  f'SOURCE:\n\t{source}\n'
-                  f'DESTINATIONS:\n\t{destinations}\n')
+            print(f'NAME: {name}\n'
+                  f'  SOURCE:\n    {source}\n'
+                  f'  DESTINATIONS:\n     {destinations}\n')
 
 
 @db_connect
