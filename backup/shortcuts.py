@@ -25,14 +25,8 @@ from database import db_connect
 @db_connect
 def create(arguments, datapath, db_cursor=None):
     shortcut, source, *destinations = arguments
-    # TODO: refactor
     checked_source = check.dir_path(source)
-    checked_destinations = []
-    for d in destinations:
-        checked_d = check.dir_path(os.path.split(d)[0])
-        checked_destinations.append(
-            os.path.join(checked_d,
-                         os.path.split(d)[1]))
+    checked_destinations = _check_destinations(destinations)
     format_destinations = ', '.join(checked_destinations)
     values = (shortcut, checked_source, format_destinations)
     db_cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', values)
@@ -47,18 +41,12 @@ def update(arguments, datapath, db_cursor=None):
         destinations = input(
             '- Destinations ["enter" to skip]:\n'
             '*use commas to separate: /user/docs/, /user/temps/\n')
-        # TODO: refactor
         if source:
             checked_source = check.dir_path(source)
             db_cursor.execute('''UPDATE shortcuts SET source = ?''',
                               (checked_source, ))
         if destinations:
-            checked_destinations = []
-            for d in destinations.split(','):
-                checked_d = check.dir_path(os.path.split(d)[0])
-                checked_destinations.append(
-                    os.path.join(checked_d,
-                                 os.path.split(d)[1]))
+            checked_destinations = _check_destinations(destinations.split(','))
             db_cursor.execute('''UPDATE shortcuts SET destinations = ?''',
                               tuple(checked_destinations))
     print('Updated successfully.\n')
@@ -105,3 +93,13 @@ def showall(arguments, datapath, db_cursor=None):
     for row in selection:
         print('\t' + row[0])
     print()
+
+
+def _check_destinations(destinations):
+    checked_destinations = []
+    for d in destinations:
+        checked_d = check.dir_path(os.path.split(d)[0])
+        checked_destinations.append(
+            os.path.join(checked_d,
+                         os.path.split(d)[1]))
+    return checked_destinations
