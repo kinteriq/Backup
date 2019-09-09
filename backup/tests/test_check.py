@@ -77,6 +77,14 @@ def test_valid_command(mock_fields_db, PATH):
     assert len(result.complete()) >= 1
 
 
+def test_invalid_cmd_args(mock_fields_db, PATH):
+    with pytest.raises(SystemExit) as e:
+        check.CommandLine(datapath=PATH,
+                          arguments=['create', 'name'],
+                          all_commands=COMMANDS).complete()
+    assert e.exconly().endswith(check.MSG['invalid_cmd_args'])
+
+
 def test_wrong_dir_path(mock_fields_db):
     path = '/test_backup_wrong_filepath/'
     with pytest.raises(SystemExit) as e:

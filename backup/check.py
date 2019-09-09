@@ -21,6 +21,7 @@ from database import db_connect
 
 MSG = {
     'invalid_cmd': 'No such command (try "help"): ',
+    'invalid_cmd_args': 'Invalid command arguments. Try "help".',
     'empty': 'Zero arguments provided.',
     'invalid_shortcut': 'No such shortcut saved: ',
     'created_shortcut_exists':
@@ -77,19 +78,19 @@ class CommandLine:
         Validate.command(available_cmds=self.commands, command=command)
         if Validate.cmd_args[command](args=self.arguments, data=self.data):
             return tuple(self.arguments)
+        else:
+            raise SystemExit(MSG['invalid_cmd_args'])
 
 
 class Validate:
     cmd_args = {
         'create':
-        lambda args, data: all([
-            len(args) >= 4,
-            not Validate.created_shortcut_exists(args=args[1], datapath=data)
-        ]),
+        lambda args, data: not Validate.created_shortcut_exists(args=args[1],
+                                                                datapath=data)
+        if len(args) >= 4 else False,
         'update':
-        lambda args, data: all(
-            [len(args) == 2,
-             Validate.shortcut(args=args[1], datapath=data)]),
+        lambda args, data: Validate.shortcut(args=args[1], datapath=data)
+        if len(args) == 2 else False,
         'delete':
         lambda args, data: any([
             len(args) >= 2,
@@ -103,10 +104,7 @@ class Validate:
             if len(args) == 2 else False
         ]),
         'showall':
-        lambda args, data: all([
-            len(args) == 1,
-            Validate.data_not_empty(datapath=data), args[0] == 'showall'
-        ]),
+        lambda args, data: Validate.data_not_empty(datapath=data),
     }
 
     def command(command, available_cmds):
