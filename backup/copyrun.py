@@ -24,7 +24,10 @@ def call(shortcuts, path):
         con = sqlite3.connect(path)
         selection = con.cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
-        _copy_manager(selection)
+        try:
+            _copy_manager(selection)
+        except OSError as e:
+            raise SystemExit(e)
     return True
 
 

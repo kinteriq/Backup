@@ -71,6 +71,7 @@ def delete(arguments, datapath, db_cursor=None):
     for shortcut in arguments:
         db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
                           (shortcut, ))
+        # TODO dont count shortcuts which are not in db
         count += 1
         deleted.append(shortcut)
 

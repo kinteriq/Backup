@@ -16,7 +16,6 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import sqlite3
-import sys
 
 from database import db_connect
 
@@ -56,7 +55,7 @@ class CommandLine:
 
     def empty(self):
         if not self.arguments:
-            sys.exit(MSG['empty'])
+            raise SystemExit(MSG['empty'])
 
     def backup_args(self):
         """
@@ -109,44 +108,44 @@ class Validate:
     def command(command, available_cmds):
         if command in available_cmds:
             return True
-        sys.exit(MSG['invalid_cmd'] + command)
+        raise SystemExit(MSG['invalid_cmd'] + command)
 
     @db_connect
-    # TODO should return True
     def created_shortcut_exists(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
         exists = selection.fetchone()[0]
         if exists:
-            sys.exit(MSG['created_shortcut_exists'])
+            raise SystemExit(MSG['created_shortcut_exists'])
+        return True
 
     @db_connect
-    # TODO should return True
     def shortcut(shortcut, datapath, db_cursor):
         selection = db_cursor.execute(
             '''SELECT EXISTS
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
         exists = selection.fetchone()[0]
         if not exists:
-            sys.exit(MSG['invalid_shortcut'] + shortcut)
+            raise SystemExit(MSG['invalid_shortcut'] + shortcut)
+        return True
 
     @db_connect
-    # TODO should return True
     def data_not_empty(args, datapath, db_cursor):
         try:
             selection = db_cursor.execute(
                 '''SELECT EXISTS (SELECT * FROM shortcuts)''')
             exists = selection.fetchone()[0]
             if not exists:
-                sys.exit(MSG['no_data'])
+                raise SystemExit(MSG['no_data'])
         except sqlite3.OperationalError:
-            sys.exit(MSG['no_data'])
+            raise SystemExit(MSG['no_data'])
+        return True
 
 
 def dir_path(path):
     if not os.path.exists(path):
-        sys.exit(MSG['wrong_path'] + path)
+        raise SystemExit(MSG['wrong_path'] + path)
     if path.startswith('~'):
         return os.path.join(os.path.expanduser('~'), path[2:])
     return path

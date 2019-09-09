@@ -7,9 +7,17 @@ from unittest.mock import patch
 
 from .context import backup
 from backup.commands import read_from_command_line, execute_command
-from .fixtures import PATH, SHORTCUT_NAMES, SOURCE, DESTINATION, ANOTHER_DESTINATION
 from check import MSG as error_msg
 
+PATH = os.path.join(os.getcwd(), 'test.db')
+
+SHORTCUT_NAMES = ('TEST_1', 'TEST_2')
+
+SOURCE = os.path.join(os.getcwd(), 'backup')
+
+DESTINATION = os.path.join(os.getcwd(), 'testBackup')
+
+ANOTHER_DESTINATION = os.path.join(os.getcwd(), 'testBackup_2')
 
 NO_ARGS = ['backup.py']
 

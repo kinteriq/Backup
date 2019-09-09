@@ -43,9 +43,9 @@ def execute_command(command, params, datapath):
     if not command:
         try:
             copyrun.call(shortcuts=params, path=datapath)
-            sys.exit('BACKUP IS FINISHED.')
+            raise SystemExit('BACKUP IS FINISHED.')
         except KeyboardInterrupt:
-            sys.exit('\n\nEXIT.')
+            raise SystemExit('\n\nEXIT.')
         except EOFError:
-            sys.exit('\n\nEXIT.')
+            raise SystemExit('\n\nEXIT.')
     COMMANDS[command](args=params, datapath=datapath)
