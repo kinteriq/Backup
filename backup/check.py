@@ -147,8 +147,8 @@ class Validate:
 
 
 def dir_path(path):
+    if path.startswith('~'):
+        path = os.path.join(os.path.expanduser('~'), path[2:])
     if not os.path.exists(path):
         raise SystemExit(MSG['wrong_path'] + path)
-    if path.startswith('~'):
-        return os.path.join(os.path.expanduser('~'), path[2:])
     return path

@@ -6,16 +6,11 @@ import sqlite3
 # TODO os.rmdir(DESTINATION)
 # TODO remove vars
 
-# PATH = os.path.join(os.getcwd(), 'test.db')
+# PATH = os.path.join(os.getcwd(), 'test.db') # TODO fixtures using PATH fixture
 SHORTCUT_NAMES = ('TEST_1', 'TEST_2')
 SOURCE = os.path.join(os.getcwd(), 'backup')
 DESTINATION = os.path.join(os.getcwd(), 'testBackup')
 ANOTHER_DESTINATION = os.path.join(os.getcwd(), 'testBackup_2')
-
-
-@pytest.fixture
-def PATH():
-    return os.path.join(os.getcwd(), 'test.db')
 
 
 @pytest.fixture
@@ -44,3 +39,8 @@ def empty_db_cursor(PATH):
     connection.commit()
     connection.close()
     os.remove(PATH)
+
+
+@pytest.fixture
+def PATH():
+    return os.path.join(os.getcwd(), 'test.db')

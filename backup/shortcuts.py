@@ -82,7 +82,7 @@ def show(arguments, datapath, db_cursor=None):
             name, source, destinations = row[0], row[1], row[2]
             print(f'NAME: {name}\n'
                   f'  SOURCE:\n    {source}\n'
-                  f'  DESTINATIONS:\n     {destinations}\n')
+                  f'  DESTINATIONS:\n    {destinations}\n')
 
 
 @db_connect

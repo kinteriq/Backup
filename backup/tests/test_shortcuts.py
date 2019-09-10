@@ -72,7 +72,7 @@ def test_show_shortcut(empty_db_cursor, PATH):
     destinations = ', '.join([DESTINATION, ANOTHER_DESTINATION])
     expected_output = (f'NAME: {NAME}\n'
                        f'  SOURCE:\n    {SOURCE}\n'
-                       f'  DESTINATIONS:\n     {destinations}\n\n')
+                       f'  DESTINATIONS:\n    {destinations}\n\n')
     shortcuts.create(args=CREATE_ARGS, datapath=PATH)
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.show(args=SHOW_ARGS, datapath=PATH)
