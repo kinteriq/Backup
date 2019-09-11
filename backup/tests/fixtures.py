@@ -43,4 +43,8 @@ def empty_db_cursor(PATH):
 
 @pytest.fixture
 def PATH():
-    return os.path.join(os.getcwd(), 'test.db')
+    yield os.path.join(os.getcwd(), 'test.db')
+    try:
+        os.remove(os.path.join(os.getcwd(), 'test.db'))
+    except FileNotFoundError:
+        pass
