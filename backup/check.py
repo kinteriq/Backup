@@ -31,6 +31,17 @@ MSG = {
 }
 
 
+def dir_path(path):
+    """
+    Check that the directory path exists.
+    """
+    if path.startswith('~'):
+        path = os.path.join(os.path.expanduser('~'), path[2:])
+    if not os.path.exists(path):
+        raise SystemExit(MSG['wrong_path'] + path)
+    return path
+
+
 class CommandLine:
     """
     Check all arguments in command line are correct.
@@ -49,6 +60,10 @@ class CommandLine:
         try:
             # see if arg[-s] is a [are] shortcut[-s]
             valid_args = self.backup_args()
+
+        except sqlite3.OperationalError:
+            raise SystemExit(MSG['no_data'])
+
         except SystemExit:
             # see if arg[-s] is [are] a correct command
             valid_args = self.command_args()
@@ -62,8 +77,9 @@ class CommandLine:
         """
         Check if every argument is a saved shortcut;
             if not: raise SystemExit
-            else: return tuple with valid arg
+            else: return tuple with valid args
         """
+        # TODO correct_shortcuts = []
         for arg in self.arguments:
             Validate.shortcut(args=arg, datapath=self.data)
         return (None, ) + tuple(self.arguments)
@@ -72,11 +88,13 @@ class CommandLine:
         """
         Check if the command is valid;
             if not: raise SystemExit
-            else: return tuple with valid arg
+            else: return tuple with valid args
         """
         command = self.arguments[0]
         Validate.command(available_cmds=self.commands, command=command)
         if Validate.cmd_args[command](args=self.arguments, data=self.data):
+            print(Validate.cmd_args[command](args=self.arguments,
+                                             data=self.data))
             return tuple(self.arguments)
         else:
             raise SystemExit(MSG['invalid_cmd_args'])
@@ -134,21 +152,9 @@ class Validate:
 
     @db_connect
     def data_not_empty(args, datapath, db_cursor):
-        try:
-            selection = db_cursor.execute(
-                '''SELECT EXISTS (SELECT * FROM shortcuts)''')
-            exists = selection.fetchone()[0]
-            if not exists:
-                raise SystemExit(MSG['no_data'])
-            return True
-
-        except sqlite3.OperationalError:
+        selection = db_cursor.execute(
+            '''SELECT EXISTS (SELECT * FROM shortcuts)''')
+        exists = selection.fetchone()[0]
+        if not exists:
             raise SystemExit(MSG['no_data'])
-
-
-def dir_path(path):
-    if path.startswith('~'):
-        path = os.path.join(os.path.expanduser('~'), path[2:])
-    if not os.path.exists(path):
-        raise SystemExit(MSG['wrong_path'] + path)
-    return path
+        return True

@@ -2,6 +2,7 @@ from io import StringIO
 import os
 import sys
 import sqlite3
+import shutil
 import unittest
 from unittest.mock import patch
 
@@ -174,6 +175,7 @@ class TestCommandLine(unittest.TestCase):
         with self.assertRaises(SystemExit) as e:
             execute_command(command=command, params=params, datapath=PATH)
         self.assertEqual(e.exception.code, 'BACKUP IS FINISHED.')
+        shutil.rmtree(DESTINATION)
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):
