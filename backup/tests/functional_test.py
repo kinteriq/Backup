@@ -179,6 +179,7 @@ class TestCommandLine(unittest.TestCase):
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):
+        expected_output = f'Deleted successfully 1 shortcut(s): {DELETE_ARGS[2]}.\n\n'
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
         execute_command(command=create_1[0],
                         params=create_1[1:],
@@ -190,9 +191,11 @@ class TestCommandLine(unittest.TestCase):
                         datapath=PATH)
         delete_cmd = patched_read_from_command_line(args=DELETE_ARGS,
                                                     path=PATH)
-        execute_command(command=delete_cmd[0],
-                        params=delete_cmd[1:],
-                        datapath=PATH)
+        with patch('sys.stdout', new=StringIO()) as mock_output:
+            execute_command(command=delete_cmd[0],
+                            params=delete_cmd[1:],
+                            datapath=PATH)
+            self.assertEqual(mock_output.getvalue(), expected_output)
         table = sqlite3.connect(PATH).cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (DELETE_ARGS[2], ))
         self.assertIsNone(table.fetchone())

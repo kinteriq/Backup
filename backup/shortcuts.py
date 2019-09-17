@@ -67,9 +67,13 @@ def delete(arguments, datapath, db_cursor=None):
         count += 1
         deleted.append(shortcut)
 
-    print(f'Deleted successfully {count} shortcut(s):')
-    for shortcut in deleted:
-        print('\t' + shortcut)
+    print(f'Deleted successfully {count} shortcut(s):', end=' ')
+    delim = ', '
+    for index, shortcut in enumerate(deleted):
+        if index == len(deleted) - 1:
+            delim = '.\n'
+        print(shortcut, end=delim)
+    print()
 
 
 @db_connect
