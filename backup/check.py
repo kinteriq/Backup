@@ -32,9 +32,6 @@ MSG = {
 
 
 class Path:
-    """
-    Check that the directory path exists.
-    """
     def single(path):
         if path.startswith('~'):
             path = os.path.join(os.path.expanduser('~'), path[2:])
@@ -45,8 +42,10 @@ class Path:
     def many(paths):
         checked = []
         for p in paths:
-            checked_path = Path.single(os.path.split(p)[0])
-            checked.append(os.path.join(checked_path, os.path.split(p)[1]))
+            dir_must_exist = os.path.split(p)[0]
+            dir_to_be_created = os.path.split(p)[1]      # TODO ask user if create dir
+            checked_path = Path.single(dir_must_exist)
+            checked.append(os.path.join(checked_path, dir_to_be_created))
         return checked
 
 
@@ -89,7 +88,7 @@ class CommandLine:
         """
         # TODO correct_shortcuts = []
         for arg in self.arguments:
-            Validate.shortcut(args=arg, datapath=self.data)
+            _Validate.shortcut(args=arg, datapath=self.data)
         return (None, ) + tuple(self.arguments)
 
     def command_args(self):
@@ -99,38 +98,36 @@ class CommandLine:
             else: return tuple with valid args
         """
         command = self.arguments[0]
-        Validate.command(available_cmds=self.commands, command=command)
-        if Validate.cmd_args[command](args=self.arguments, data=self.data):
-            print(Validate.cmd_args[command](args=self.arguments,
-                                             data=self.data))
+        _Validate.command(available_cmds=self.commands, command=command)
+        if _Validate.cmd_args[command](args=self.arguments, data=self.data):
             return tuple(self.arguments)
         else:
             raise SystemExit(MSG['invalid_cmd_args'])
 
 
-class Validate:
+class _Validate:
     cmd_args = {
         'create':
-        lambda args, data: not Validate.created_shortcut_exists(args=args[1],
+        lambda args, data: not _Validate.created_shortcut_exists(args=args[1],
                                                                 datapath=data)
         if len(args) >= 4 else False,
         'update':
-        lambda args, data: Validate.shortcut(args=args[1], datapath=data)
+        lambda args, data: _Validate.shortcut(args=args[1], datapath=data)
         if len(args) == 2 else False,
         'delete':
         lambda args, data: any([
             len(args) >= 2,
-            Validate.shortcut(args=args[1], datapath=data)
+            _Validate.shortcut(args=args[1], datapath=data)
             if len(args) == 2 else False
         ]),
         'show':
         lambda args, data: any([
             len(args) >= 2,
-            Validate.shortcut(args=args[1], datapath=data)
+            _Validate.shortcut(args=args[1], datapath=data)
             if len(args) == 2 else False
         ]),
         'showall':
-        lambda args, data: Validate.data_not_empty(datapath=data),
+        lambda args, data: _Validate.data_not_empty(datapath=data),
     }
 
     def command(command, available_cmds):
