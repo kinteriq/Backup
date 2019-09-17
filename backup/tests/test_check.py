@@ -106,20 +106,20 @@ class TestCommandLineComplete:
         assert e.exconly().endswith(check.MSG['no_data'])
 
 
-class TestDirPath:
+class TestPath:
     @staticmethod
     def test_wrong_path():
         path = '/test_backup_wrong_filepath/'
         with pytest.raises(SystemExit) as e:
-            check.dir_path(path)
+            check.Path.single(path)
         assert e.exconly().endswith(check.MSG['wrong_path'] + path)
 
     @staticmethod
     def test_correct_path():
         path = os.getcwd()
-        assert check.dir_path(path) == path
+        assert check.Path.single(path) == path
 
     @staticmethod
     def test_auto_expand_path():
         path = '~/'
-        assert check.dir_path(path) == os.path.expanduser('~/')
+        assert check.Path.single(path) == os.path.expanduser('~/')

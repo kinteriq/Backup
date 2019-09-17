@@ -31,15 +31,23 @@ MSG = {
 }
 
 
-def dir_path(path):
+class Path:
     """
     Check that the directory path exists.
     """
-    if path.startswith('~'):
-        path = os.path.join(os.path.expanduser('~'), path[2:])
-    if not os.path.exists(path):
-        raise SystemExit(MSG['wrong_path'] + path)
-    return path
+    def single(path):
+        if path.startswith('~'):
+            path = os.path.join(os.path.expanduser('~'), path[2:])
+        if not os.path.exists(path):
+            raise SystemExit(MSG['wrong_path'] + path)
+        return path
+
+    def many(paths):
+        checked = []
+        for p in paths:
+            checked_path = Path.single(os.path.split(p)[0])
+            checked.append(os.path.join(checked_path, os.path.split(p)[1]))
+        return checked
 
 
 class CommandLine:
