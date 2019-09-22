@@ -4,11 +4,12 @@ import os
 import sqlite3
 
 from backup import check
+from backup import commands
 from .fixtures import PATH, mock_fields_db, empty_db_cursor
 
 SHORTCUT_NAMES = ('TEST_1', 'TEST_2')
 
-COMMANDS = ('create', 'delete', 'show', 'showall', 'update')
+COMMANDS = commands.COMMANDS
 
 
 class TestCommandLineComplete:

@@ -22,6 +22,8 @@ ANOTHER_DESTINATION = os.path.join(os.getcwd(), 'testBackup_2')
 
 NO_ARGS = ['backup.py']
 
+HELP_ARGS = ['backup.py', 'help']
+
 SHORTCUT_1 = SHORTCUT_NAMES[0]
 
 SHORTCUT_2 = SHORTCUT_NAMES[1]
@@ -72,6 +74,12 @@ class TestCommandLine(unittest.TestCase):
         with self.assertRaises(SystemExit) as e:
             patched_read_from_command_line(args=NO_ARGS, path=PATH)
         self.assertEqual(e.exception.code, error_msg['empty'])
+
+    # User enters help command
+    def test_receive_help_command(self):
+        with self.assertRaises(SystemExit) as e:
+            params = patched_read_from_command_line(args=HELP_ARGS, path=PATH)
+        self.assertEqual(e.exception.code, backup.commands.__doc__)
 
     # User tries creating a shortcut but misspells 'create' and sees error msg
     def test_receive_invalid_command(self):

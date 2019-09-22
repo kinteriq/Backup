@@ -14,7 +14,24 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+Command          | Description
+-----------------|------------------------------------
+    create       | create a shortcut
+    delete       | delete a shortcut
+    update       | change shortcut's source and/or destination paths
+    show         | fetch shortcut's source and destination paths
+    showall      | fetch all shortcuts from the database
+    shortcut     | do a backup
 
+EXAMPLE:
+
+    ::create a shortcut for later use::
+            python3 backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
+
+    ::backup the content of ~/Documents/ to both ~/cloud_1/docs/ and ~/cloud_2/docs/::
+            python3 backup.py documents
+"""
 import sys
 
 import check
@@ -33,6 +50,9 @@ COMMANDS = {
 
 def read_from_command_line(datapath) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
+    if 'help' in args:
+        import commands
+        raise SystemExit(commands.__doc__)
     valid_args = check.CommandLine(datapath=datapath,
                                    arguments=args,
                                    all_commands=COMMANDS).complete()

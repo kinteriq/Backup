@@ -22,7 +22,7 @@ from database import db_connect
 MSG = {
     'invalid_cmd': 'No such command (try "help"): ',
     'invalid_cmd_args': 'Invalid command arguments. Try "help".',
-    'empty': 'Zero arguments provided.',
+    'empty': 'Zero arguments provided. Try "help".',
     'invalid_shortcut': 'No such shortcut saved: ',
     'created_shortcut_exists':
     'Shortcut is already in the database. Try "update" command.',

@@ -21,7 +21,6 @@ import config
 import database
 
 
-# TODO help cmd
 def main(datapath):
     try:
         database.db_creator(datapath)

@@ -12,11 +12,20 @@ EMPTY_ARGS = []
 
 INVALID_CMD_ARGS = ['backup.py', 'messed', 'up']
 
+HELP_ARGS = ['backup.py', 'help']
+
 SHOWALL_ARGS = ['backup.py', 'showall']
 
 BACKUP_ARGS = ['backup.py'] + list(SHORTCUT_NAMES)
 
 VALID_CMD_ARGS = ['backup.py', 'create', 'NAME', SOURCE, DESTINATION]
+
+
+def test_help_command(monkeypatch):
+    monkeypatch.setattr(sys, 'argv', HELP_ARGS)
+    with pytest.raises(SystemExit) as e:
+        read_from_command_line(datapath=PATH)
+    assert backup.commands.__doc__.strip() in e.exconly()
 
 
 def test_got_empty_line(monkeypatch, PATH):
