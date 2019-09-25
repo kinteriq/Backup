@@ -1,15 +1,19 @@
 import os
 import pytest
 import sqlite3
+import shutil
 
-from .fixtures import PATH, SOURCE, DESTINATION, mock_fields_db
+from .fixtures import PATH, SHORTCUT_NAMES, SOURCE, DESTINATION, mock_fields_db
 from backup import copyrun
-
-DATA_1 = ('testing', SOURCE, DESTINATION)
 
 
 def test_copyall_ok(mock_fields_db, PATH):
-    assert copyrun.call(['testing'], PATH) is True
+    """
+    Copying all files from backup folder to test folder.
+    """
+    copyrun.call([SHORTCUT_NAMES[0]], PATH)
+    assert set(os.listdir(SOURCE)) == set(os.listdir(DESTINATION))
+    shutil.rmtree(DESTINATION)
 
 
 @pytest.mark.skip('FINISH')

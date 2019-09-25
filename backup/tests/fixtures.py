@@ -3,7 +3,6 @@ import os
 import sqlite3
 
 
-# TODO os.rmdir(DESTINATION)
 # TODO remove vars
 
 # PATH = os.path.join(os.getcwd(), 'test.db') # TODO fixtures using PATH fixture
@@ -19,9 +18,9 @@ def mock_fields_db(PATH):   # TODO unite with empty_db_cursor
     cursor = connection.cursor()
     cursor.execute('''CREATE TABLE shortcuts
         (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
-    first_name = (SHORTCUT_NAMES[0], 'from/path_1', 'to/path_1')
+    first_name = (SHORTCUT_NAMES[0], SOURCE, DESTINATION)
     cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', first_name)
-    second_name = (SHORTCUT_NAMES[1], 'from/path_2', 'to/path_2')
+    second_name = (SHORTCUT_NAMES[1], SOURCE, ANOTHER_DESTINATION)
     cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', second_name)
     connection.commit()
     connection.close()

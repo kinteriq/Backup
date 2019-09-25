@@ -64,7 +64,7 @@ def _copy(source, destination, replace_all, replace_nothing):
 
 
 def _replace_manager(destination, replace_nothing, replace_all):
-    replace_one = False
+    replace_one = True
     if os.path.exists(destination):
         if replace_nothing or replace_all:
             return (replace_one, replace_all, replace_nothing)
@@ -75,18 +75,17 @@ def _replace_manager(destination, replace_nothing, replace_all):
 
 
 def _perm_to_replace(file):
-    _one = False
+    _one = True
     _all = False
     _all_no = False
     ask = input(f'\nFile already exists:\n"{file}"\nReplace (y/all/nothing)? ')
     if ask == 'all':
-        _one = True
         _all = True
         return (_one, _all, _all_no)
     elif ask == 'nothing':
+        _one = False
         _all_no = True
         return (_one, _all, _all_no)
     elif ask == 'y':
-        _one = True
         return (_one, _all, _all_no)
     return (_one, _all, _all_no)
