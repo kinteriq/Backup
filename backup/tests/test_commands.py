@@ -35,31 +35,31 @@ def test_got_empty_line(monkeypatch, PATH):
     assert error_message['empty'] in e.exconly()
 
 
-def test_got_invalid_command(monkeypatch, mock_fields_db, PATH):
+def test_got_invalid_command(monkeypatch, mock_fields_db):
     monkeypatch.setattr(sys, 'argv', INVALID_CMD_ARGS)
     with pytest.raises(SystemExit) as e:
-        read_from_command_line(datapath=PATH)
+        read_from_command_line(datapath=mock_fields_db)
     assert error_message['invalid_cmd'] in e.exconly()
 
 
-def test_got_showall_command(monkeypatch, mock_fields_db, PATH):
+def test_got_showall_command(monkeypatch, mock_fields_db):
     monkeypatch.setattr(sys, 'argv', SHOWALL_ARGS)
-    assert read_from_command_line(datapath=PATH) == ('showall', )
+    assert read_from_command_line(datapath=mock_fields_db) == ('showall', )
 
 
-def test_got_a_shortcut(monkeypatch, mock_fields_db, PATH):
+def test_got_a_shortcut(monkeypatch, mock_fields_db):
     monkeypatch.setattr(sys, 'argv', BACKUP_ARGS)
-    command, *params = read_from_command_line(datapath=PATH)
+    command, *params = read_from_command_line(datapath=mock_fields_db)
     assert (command, params) == (None, BACKUP_ARGS[1:])
 
 
-def test_got_valid_command(monkeypatch, mock_fields_db, PATH):
+def test_got_valid_command(monkeypatch, mock_fields_db):
     monkeypatch.setattr(sys, 'argv', VALID_CMD_ARGS)
-    result = read_from_command_line(datapath=PATH)
+    result = read_from_command_line(datapath=mock_fields_db)
     assert result == ('create', 'NAME', SOURCE, DESTINATION)
 
 
-def test_execute_create_command(mock_fields_db, PATH):
+def test_execute_create_command(mock_fields_db):
     command, *params = VALID_CMD_ARGS[1:]
     assert execute_command(command=command, params=params,
-                           datapath=PATH) is None
+                           datapath=mock_fields_db) is None

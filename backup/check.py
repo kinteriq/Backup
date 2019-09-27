@@ -128,6 +128,7 @@ class _Validate:
         ]),
         'showall':
         lambda args, data: _Validate.data_not_empty(datapath=data),
+        'clear': lambda args, data: True,
     }
 
     def command(command, available_cmds):

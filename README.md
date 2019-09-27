@@ -20,12 +20,14 @@ Makes day-to-day backups easier.
 ## Commands:
 Command          | Description
 -----------------|------------------------------------
+help             | get documentation
 create           | create a shortcut
 delete           | delete a shortcut
 update           | change shortcut's source and/or destination paths
 show             | fetch shortcut's source and destination paths
 showall          | fetch all shortcuts from the database
 *shortcut*\*     | do a backup
+clear            | delete all shortcuts from the database
 
 ### __create__:
 create _shortcut-name source-path destination-path_

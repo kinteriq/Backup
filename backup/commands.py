@@ -15,14 +15,28 @@
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-Command          | Description
------------------|------------------------------------
-    create       | create a shortcut
-    delete       | delete a shortcut
-    update       | change shortcut's source and/or destination paths
-    show         | fetch shortcut's source and destination paths
-    showall      | fetch all shortcuts from the database
-    shortcut     | do a backup
+COMMANDS:
+
+    ::create a shortcut::
+        create NAME PATH_FROM PATH_TO_1 [ PATH_TO_2 ] ...
+
+    ::delete shortcuts::
+        delete NAME [ NAME-2 ] ...
+    
+    ::change shortcut's source and/or destination paths::
+        update NAME
+
+    ::fetch shortcut's source and destination paths::
+        show NAME [ NAME-2 ] ...
+
+    ::fetch all shortcuts::
+        showall
+
+    ::do a backup::
+        NAME
+        
+    ::delete all shortcuts::
+        clear
 
 EXAMPLE:
 
@@ -44,7 +58,7 @@ COMMANDS = {
     'delete': shortcuts.delete,
     'show': shortcuts.show,
     'showall': shortcuts.showall,
-    'clear': None,
+    'clear': shortcuts.clear,
 }
 
 

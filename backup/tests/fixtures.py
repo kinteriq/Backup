@@ -24,7 +24,7 @@ def mock_fields_db(PATH):   # TODO unite with empty_db_cursor
     cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', second_name)
     connection.commit()
     connection.close()
-    yield connection
+    yield PATH
     os.remove(PATH)
 
 

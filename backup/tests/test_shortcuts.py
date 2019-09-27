@@ -5,7 +5,8 @@ import sqlite3
 from unittest import mock
 
 from backup import shortcuts
-from .fixtures import PATH, SOURCE, DESTINATION, ANOTHER_DESTINATION, empty_db_cursor
+from .fixtures import (PATH, SOURCE, DESTINATION, ANOTHER_DESTINATION,
+    empty_db_cursor, mock_fields_db)
 
 NAME = 'NAME-1'
 
@@ -85,4 +86,16 @@ def test_showall(empty_db_cursor, PATH):
     shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=PATH)
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.showall(args=SHOWALL_ARGS, datapath=PATH)
+        assert mock_output.getvalue() == expected_output
+
+
+def test_clear(mock_fields_db):
+    expected_output = 'Database is cleared.\n'
+    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
+        shortcuts.clear(args=['clear'], datapath=mock_fields_db)
+        with pytest.raises(sqlite3.OperationalError) as e:
+            connection = sqlite3.connect(mock_fields_db)
+            cursor = connection.cursor()
+            selection = cursor.execute('SELECT * FROM shortcuts')
+            assert 'no such table: shortcuts' == e.exconly()
         assert mock_output.getvalue() == expected_output

@@ -97,3 +97,9 @@ def showall(arguments, datapath, db_cursor=None):
     for row in selection:
         print('\t' + row[0])
     print()
+
+
+@db_connect
+def clear(arguments, datapath, db_cursor=None):
+    db_cursor.execute('''DROP TABLE IF EXISTS shortcuts''')
+    print('Database is cleared.')
