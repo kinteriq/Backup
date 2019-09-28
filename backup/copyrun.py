@@ -19,16 +19,24 @@ import shutil
 import sqlite3
 
 
+PERMISSIONS = {
+        'replace_all': False,
+        'replace_nothing': False,
+        'replace_one': True,
+    }
+
+
 def call(shortcuts, path):
+    con = sqlite3.connect(path)
     for shortcut in shortcuts:
-        con = sqlite3.connect(path)
         selection = con.cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
         try:
             _copy_manager(selection)
         except OSError as e:
+            con.close()
             raise SystemExit(e)
-    return True
+    con.close()
 
 
 def _copy_manager(table):
@@ -36,56 +44,38 @@ def _copy_manager(table):
         source = row[1]
         destinations = row[2].split(', ')
         for d in destinations:
-            _copy(source, d, False, False)
+            _copy(source, d)
 
 
-def _copy(source, destination, replace_all, replace_nothing):
+def _copy(source, destination):
     if not os.path.exists(destination):
         os.mkdir(destination)
     for file in os.listdir(source):
         path = os.path.join(source, file)
         if os.path.isdir(path):
             destination_dir = os.path.join(destination, file)
-            replace_all, replace_nothing = _copy(path, destination_dir,
-                                                 replace_all, replace_nothing)
+            _copy(path, destination_dir)
         elif os.path.isfile(path):
             destination_file = os.path.join(destination, file)
-            replace_one, replace_all, replace_nothing = _replace_manager(
-                destination_file, replace_nothing, replace_all)
-            if replace_nothing:
-                continue
-            if replace_all:
-                pass
-            elif not replace_one:
-                continue
+            if os.path.exists(destination_file):
+                if PERMISSIONS['replace_nothing']:
+                    continue
+                if PERMISSIONS['replace_all']:
+                    pass
+                else:
+                    _perm_to_replace(destination_file)
+                if not PERMISSIONS['replace_one']:
+                    continue
             print(f'Copying:\n\t{path}\n\t-->{destination_file}')
             shutil.copyfile(path, destination_file)
-    return (replace_all, replace_nothing)
-
-
-def _replace_manager(destination, replace_nothing, replace_all):
-    replace_one = True
-    if os.path.exists(destination):
-        if replace_nothing or replace_all:
-            return (replace_one, replace_all, replace_nothing)
-        else:
-            replace_one, replace_all, replace_nothing = _perm_to_replace(
-                destination)
-    return (replace_one, replace_all, replace_nothing)
 
 
 def _perm_to_replace(file):
-    _one = True
-    _all = False
-    _all_no = False
     ask = input(f'\nFile already exists:\n"{file}"\nReplace (y/all/nothing)? ')
     if ask == 'all':
-        _all = True
-        return (_one, _all, _all_no)
+        PERMISSIONS['replace_all'] = True
     elif ask == 'nothing':
-        _one = False
-        _all_no = True
-        return (_one, _all, _all_no)
-    elif ask == 'y':
-        return (_one, _all, _all_no)
-    return (_one, _all, _all_no)
+        PERMISSIONS['replace_one'] = False
+        PERMISSIONS['replace_nothing'] = True
+    elif ask != 'y':
+        PERMISSIONS['replace_one'] = False

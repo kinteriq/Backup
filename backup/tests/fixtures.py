@@ -8,8 +8,8 @@ import sqlite3
 # PATH = os.path.join(os.getcwd(), 'test.db') # TODO fixtures using PATH fixture
 SHORTCUT_NAMES = ('TEST_1', 'TEST_2')
 SOURCE = os.path.join(os.getcwd(), 'backup')
-DESTINATION = os.path.join(os.getcwd(), 'testBackup')
-ANOTHER_DESTINATION = os.path.join(os.getcwd(), 'testBackup_2')
+DESTINATION = os.path.join(os.getcwd(), 'testBackup12424325')
+ANOTHER_DESTINATION = os.path.join(os.getcwd(), 'testBackup_2324u43857843584624734')
 
 
 @pytest.fixture
