@@ -18,6 +18,8 @@ import os
 import shutil
 import sqlite3
 
+import outputs
+
 
 PERMISSIONS = {
         'replace_all': False,
@@ -66,12 +68,13 @@ def _copy(source, destination):
                     _perm_to_replace(destination_file)
                 if not PERMISSIONS['replace_one']:
                     continue
-            print(f'Copying:\n\t{path}\n\t-->{destination_file}')
+            print(outputs.copying(path, destination_file))
             shutil.copyfile(path, destination_file)
 
 
 def _perm_to_replace(file):
-    ask = input(f'\nFile already exists:\n"{file}"\nReplace (y/all/nothing)? ')
+    ask = input(f'''\nFile already exists:
+    "{file}"\n\nReplace (y/all/nothing)? ''')
     if ask == 'all':
         PERMISSIONS['replace_all'] = True
     elif ask == 'nothing':

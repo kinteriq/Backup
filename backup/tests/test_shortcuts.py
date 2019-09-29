@@ -4,7 +4,7 @@ import pytest
 import sqlite3
 from unittest import mock
 
-from backup import shortcuts
+from backup import shortcuts, outputs
 from .fixtures import (PATH, SOURCE, DESTINATION, ANOTHER_DESTINATION,
     empty_db_cursor, mock_fields_db)
 
@@ -30,7 +30,7 @@ WRONG_PATH_ARGS = [NAME, 'wrong_path', 'path']
 def test_wrong_path_name(empty_db_cursor, PATH):
     with pytest.raises(SystemExit) as e:
         shortcuts.create(args=WRONG_PATH_ARGS, datapath=PATH)
-    assert 'Directory does not exist' in e.exconly()
+        assert 'Directory does not exist' in e.exconly()
 
 
 def test_shortcut_is_created(empty_db_cursor, PATH):
@@ -71,26 +71,24 @@ def test_delete_many_shortcuts(empty_db_cursor, PATH):
 
 def test_show_shortcut(empty_db_cursor, PATH):
     destinations = ', '.join([DESTINATION, ANOTHER_DESTINATION])
-    expected_output = (f'NAME: {NAME}\n'
-                       f'  SOURCE:\n    {SOURCE}\n'
-                       f'  DESTINATIONS:\n    {destinations}\n\n')
+    expected_output = outputs.show_msg(NAME, SOURCE, destinations)
     shortcuts.create(args=CREATE_ARGS, datapath=PATH)
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.show(args=SHOW_ARGS, datapath=PATH)
-        assert mock_output.getvalue() == expected_output
+        assert mock_output.getvalue().rstrip() == expected_output
 
 
 def test_showall(empty_db_cursor, PATH):
-    expected_output = f'SAVED NAMES:\n\t{NAME}\n\t{ANOTHER_NAME}\n\n'
+    expected_output = outputs.showall_msg([NAME, ANOTHER_NAME])
     shortcuts.create(args=CREATE_ARGS, datapath=PATH)
     shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=PATH)
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.showall(args=SHOWALL_ARGS, datapath=PATH)
-        assert mock_output.getvalue() == expected_output
+        assert mock_output.getvalue().rstrip() == expected_output
 
 
 def test_clear(mock_fields_db):
-    expected_output = 'Database is cleared.\n'
+    expected_output = outputs.clear_msg()
     with mock.patch('sys.stdout', new=StringIO()) as mock_output:
         shortcuts.clear(args=['clear'], datapath=mock_fields_db)
         with pytest.raises(sqlite3.OperationalError) as e:
@@ -98,4 +96,4 @@ def test_clear(mock_fields_db):
             cursor = connection.cursor()
             selection = cursor.execute('SELECT * FROM shortcuts')
             assert 'no such table: shortcuts' == e.exconly()
-        assert mock_output.getvalue() == expected_output
+        assert mock_output.getvalue().rstrip() == expected_output

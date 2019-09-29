@@ -18,17 +18,7 @@ import os
 import sqlite3
 
 from database import db_connect
-
-MSG = {
-    'invalid_cmd': 'No such command (try "help"): ',
-    'invalid_cmd_args': 'Invalid command arguments. Try "help".',
-    'empty': 'Zero arguments provided. Try "help".',
-    'invalid_shortcut': 'No such shortcut saved: ',
-    'created_shortcut_exists':
-    'Shortcut is already in the database. Try "update" command.',
-    'no_data': 'No shortcuts saved. Try "create" or "help" command.',
-    'wrong_path': 'Directory does not exist:\n\t'
-}
+from outputs import ERROR_MSG
 
 
 class Path:
@@ -36,7 +26,7 @@ class Path:
         if path.startswith('~'):
             path = os.path.join(os.path.expanduser('~'), path[2:])
         if not os.path.exists(path):
-            raise SystemExit(MSG['wrong_path'] + path)
+            raise SystemExit(ERROR_MSG['wrong_path'](path))
         return path
 
     def many(paths):
@@ -69,7 +59,7 @@ class CommandLine:
             valid_args = self.backup_args()
 
         except sqlite3.OperationalError:
-            raise SystemExit(MSG['no_data'])
+            raise SystemExit(ERROR_MSG['no_data'])
 
         except SystemExit:
             # see if arg[-s] is [are] a correct command
@@ -78,7 +68,7 @@ class CommandLine:
 
     def empty(self):
         if not self.arguments:
-            raise SystemExit(MSG['empty'])
+            raise SystemExit(ERROR_MSG['empty'])
 
     def backup_args(self):
         """
@@ -102,7 +92,7 @@ class CommandLine:
         if _Validate.cmd_args[command](args=self.arguments, data=self.data):
             return tuple(self.arguments)
         else:
-            raise SystemExit(MSG['invalid_cmd_args'])
+            raise SystemExit(ERROR_MSG['invalid_cmd_args'])
 
 
 class _Validate:
@@ -134,7 +124,7 @@ class _Validate:
     def command(command, available_cmds):
         if command in available_cmds:
             return True
-        raise SystemExit(MSG['invalid_cmd'] + command)
+        raise SystemExit(ERROR_MSG['invalid_cmd'](command))
 
     @db_connect
     def created_shortcut_exists(shortcut, datapath, db_cursor):
@@ -143,7 +133,7 @@ class _Validate:
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
         exists = selection.fetchone()[0]
         if exists:
-            raise SystemExit(MSG['created_shortcut_exists'])
+            raise SystemExit(ERROR_MSG['created_shortcut_exists'])
         return False
 
     @db_connect
@@ -153,7 +143,7 @@ class _Validate:
             (SELECT 1 FROM shortcuts WHERE name = ?)''', (shortcut, ))
         exists = selection.fetchone()[0]
         if not exists:
-            raise SystemExit(MSG['invalid_shortcut'] + shortcut)
+            raise SystemExit(ERROR_MSG['invalid_shortcut'](shortcut))
         return True
 
     @db_connect
@@ -162,5 +152,5 @@ class _Validate:
             '''SELECT EXISTS (SELECT * FROM shortcuts)''')
         exists = selection.fetchone()[0]
         if not exists:
-            raise SystemExit(MSG['no_data'])
+            raise SystemExit(ERROR_MSG['no_data'])
         return True

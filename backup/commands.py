@@ -50,7 +50,9 @@ import sys
 
 import check
 import copyrun
+import outputs
 import shortcuts
+
 
 COMMANDS = {
     'create': shortcuts.create,
@@ -65,8 +67,7 @@ COMMANDS = {
 def read_from_command_line(datapath) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
     if 'help' in args:
-        import commands
-        raise SystemExit(commands.__doc__)
+        raise SystemExit(outputs.COMMANDS_INFO)
     valid_args = check.CommandLine(datapath=datapath,
                                    arguments=args,
                                    all_commands=COMMANDS).complete()
@@ -77,9 +78,9 @@ def execute_command(command, params, datapath):
     if not command:
         try:
             copyrun.call(shortcuts=params, path=datapath)
-            raise SystemExit('BACKUP IS FINISHED.')
+            raise SystemExit(outputs.PROGRAM_END)
         except KeyboardInterrupt:
-            raise SystemExit('\n\nEXIT.')
+            raise SystemExit(outputs.PROGRAM_QUIT)
         except EOFError:
-            raise SystemExit('\n\nEXIT.')
+            raise SystemExit(outputs.PROGRAM_QUIT)
     COMMANDS[command](args=params, datapath=datapath)

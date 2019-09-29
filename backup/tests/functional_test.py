@@ -7,8 +7,9 @@ import unittest
 from unittest.mock import patch
 
 from .context import backup
+from backup import outputs
 from backup.commands import read_from_command_line, execute_command
-from check import MSG as error_msg
+
 
 PATH = os.path.join(os.getcwd(), 'test.db')
 
@@ -73,51 +74,46 @@ class TestCommandLine(unittest.TestCase):
     def test_receive_empty_command(self):
         with self.assertRaises(SystemExit) as e:
             patched_read_from_command_line(args=NO_ARGS, path=PATH)
-        self.assertEqual(e.exception.code, error_msg['empty'])
+            self.assertEqual(e.exception.code, outputs.ERROR_MSG['empty'])
 
     # User enters help command
     def test_receive_help_command(self):
         with self.assertRaises(SystemExit) as e:
             params = patched_read_from_command_line(args=HELP_ARGS, path=PATH)
-        self.assertEqual(e.exception.code, backup.commands.__doc__)
+            self.assertEqual(e.exception.code, backup.commands.__doc__)
 
     # User tries creating a shortcut but misspells 'create' and sees error msg
     def test_receive_invalid_command(self):
         name = MISSPELLED_CREATE_COMMAND_ARGS[1]
-        expected_output = error_msg['invalid_cmd'] + name
+        expected_output = outputs.ERROR_MSG['invalid_cmd'](name)
         with self.assertRaises(SystemExit) as e:
             patched_read_from_command_line(args=MISSPELLED_CREATE_COMMAND_ARGS,
                                            path=PATH)
-        self.assertEqual(e.exception.code, expected_output)
+            self.assertEqual(e.exception.code, expected_output)
 
     # User creates a shortcut and sees the program's output
     def test_receive_create_command(self):
-        expected_output = f'Shortcut is created: "{SHORTCUT_1}".\n\n'
+        expected_output = outputs.create_msg(CREATE_ARGS[2])
         params = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
-
         with patch('sys.stdout', new=StringIO()) as mock_output:
             execute_command(command=params[0],
                             params=params[1:],
                             datapath=PATH)
-            self.assertEqual(mock_output.getvalue(), expected_output)
+            self.assertEqual(mock_output.getvalue().rstrip(), expected_output)
 
     # Checks that the shortcut was saved by entering 'show {shortcut}' command
     def test_receive_show_command(self):
-        expected_output = (f'NAME: {SHORTCUT_1}\n'
-                           f'  SOURCE:\n    {SOURCE}\n'
-                           f'  DESTINATIONS:\n    {DESTINATION}\n\n')
-
+        expected_output = outputs.show_msg(SHORTCUT_1, SOURCE, DESTINATION)
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
         execute_command(command=create_1[0],
                         params=create_1[1:],
                         datapath=PATH)
         show_cmd = patched_read_from_command_line(args=SHOW_ARGS, path=PATH)
-
         with patch('sys.stdout', new=StringIO()) as mock_output:
             execute_command(command=show_cmd[0],
                             params=show_cmd[1:],
                             datapath=PATH)
-            self.assertEqual(mock_output.getvalue(), expected_output)
+            self.assertEqual(mock_output.getvalue().rstrip(), expected_output)
 
     # Sees that the destination path is wrong;
     #   Changes the destination path
@@ -125,6 +121,8 @@ class TestCommandLine(unittest.TestCase):
 
     @patch('builtins.input', side_effect=user_input)
     def test_receive_update_command(self, user_input):
+        expected = set(outputs.update_msg(shortcut=SHORTCUT_1,
+            updated_lst=[SHORTCUT_1]).split('\n'))
         create_cmd = patched_read_from_command_line(args=CREATE_ARGS,
                                                     path=PATH)
         execute_command(command=create_cmd[0],
@@ -132,9 +130,12 @@ class TestCommandLine(unittest.TestCase):
                         datapath=PATH)
         update_cmd = patched_read_from_command_line(args=UPDATE_ARGS,
                                                     path=PATH)
-        execute_command(command=update_cmd[0],
-                        params=update_cmd[1:],
-                        datapath=PATH)
+        with patch('sys.stdout', new=StringIO()) as mock_output:
+            execute_command(command=update_cmd[0],
+                            params=update_cmd[1:],
+                            datapath=PATH)
+            result = set(mock_output.getvalue().split('\n'))
+            self.assertTrue(expected.issubset(result))
         table = sqlite3.connect(PATH).cursor().execute(
             '''SELECT * FROM shortcuts''')
         self.assertEqual(table.fetchone()[2], ANOTHER_DESTINATION)
@@ -142,8 +143,7 @@ class TestCommandLine(unittest.TestCase):
     # User creates another shortcut and checks that they are both saved
     #   with 'showall' command
     def test_receive_showall_command(self):
-        expected_output = f'SAVED NAMES:\n\t{SHORTCUT_1}\n\t{SHORTCUT_2}\n\n'
-
+        expected_output = outputs.showall_msg([SHORTCUT_1, SHORTCUT_2])
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
         execute_command(command=create_1[0],
                         params=create_1[1:],
@@ -155,21 +155,19 @@ class TestCommandLine(unittest.TestCase):
                         datapath=PATH)
         showall_cmd = patched_read_from_command_line(args=SHOWALL_ARGS,
                                                      path=PATH)
-
         with patch('sys.stdout', new=StringIO()) as mock_output:
             execute_command(command=showall_cmd[0],
                             params=showall_cmd[1:],
                             datapath=PATH)
-            self.assertEqual(mock_output.getvalue(), expected_output)
+            self.assertEqual(mock_output.getvalue().rstrip(), expected_output)
 
     # User tries backing up using the saved shortcut but misspells its name
     def test_receive_invalid_shortcut_name(self):
         name = WRONG_SHORTCUT_ARGS[-1]
-        expected_output = error_msg['invalid_cmd'] + name
-
+        expected_output = outputs.ERROR_MSG['invalid_cmd'](name)
         with self.assertRaises(SystemExit) as e:
             patched_read_from_command_line(args=WRONG_SHORTCUT_ARGS, path=PATH)
-        self.assertEqual(e.exception.code, expected_output)
+            self.assertEqual(e.exception.code, expected_output)
 
     # Enters the correct shortcut's name
     def test_runbackup_command(self):
@@ -182,12 +180,12 @@ class TestCommandLine(unittest.TestCase):
                                                           path=PATH)
         with self.assertRaises(SystemExit) as e:
             execute_command(command=command, params=params, datapath=PATH)
-        self.assertEqual(e.exception.code, 'BACKUP IS FINISHED.')
+            self.assertEqual(e.exception.code, 'BACKUP IS FINISHED.')
         shutil.rmtree(DESTINATION)
 
     # Decides to delete shortcut from the database
     def test_receive_delete_command(self):
-        expected_output = f'Deleted successfully 1 shortcut(s): {DELETE_ARGS[2]}.\n\n'
+        expected_output = outputs.delete_msg([DELETE_ARGS[2]])
         create_1 = patched_read_from_command_line(args=CREATE_ARGS, path=PATH)
         execute_command(command=create_1[0],
                         params=create_1[1:],
@@ -203,7 +201,7 @@ class TestCommandLine(unittest.TestCase):
             execute_command(command=delete_cmd[0],
                             params=delete_cmd[1:],
                             datapath=PATH)
-            self.assertEqual(mock_output.getvalue(), expected_output)
+            self.assertEqual(mock_output.getvalue().rstrip(), expected_output)
         table = sqlite3.connect(PATH).cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (DELETE_ARGS[2], ))
         self.assertIsNone(table.fetchone())

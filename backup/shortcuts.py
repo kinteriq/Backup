@@ -20,6 +20,7 @@ import sqlite3
 
 import check
 from database import db_connect
+import outputs
 
 
 @db_connect
@@ -30,13 +31,14 @@ def create(arguments, datapath, db_cursor=None):
     format_destinations = ', '.join(checked_destinations)
     values = (shortcut, checked_source, format_destinations)
     db_cursor.execute('''INSERT INTO shortcuts VALUES (?,?,?)''', values)
-    print(f'Shortcut is created: "{shortcut}".\n')
+    print(outputs.create_msg(shortcut))
 
 
 @db_connect
 def update(arguments, datapath, db_cursor=None):
+    updated = []
     for shortcut in arguments:
-        print(f'Update "{shortcut}"\n')
+        print(outputs.update_msg(shortcut))
         source = input('- Source ["enter" to skip]:\n')
         destinations = input(
             '- Destinations ["enter" to skip]:\n'
@@ -49,12 +51,13 @@ def update(arguments, datapath, db_cursor=None):
             checked_destinations = check.Path.many(destinations.split(','))
             db_cursor.execute('''UPDATE shortcuts SET destinations = ?''',
                               tuple(checked_destinations))
-    print('Updated successfully.\n')
+        if source or destinations:
+            updated.append(shortcut)
+    print(outputs.update_msg(updated_lst=updated))
 
 
 @db_connect
 def delete(arguments, datapath, db_cursor=None):
-    count = 0
     deleted = []
     for shortcut in arguments:
         select_shortcut = db_cursor.execute(
@@ -64,16 +67,8 @@ def delete(arguments, datapath, db_cursor=None):
             continue
         db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
                           (shortcut, ))
-        count += 1
         deleted.append(shortcut)
-
-    print(f'Deleted successfully {count} shortcut(s):', end=' ')
-    delim = ', '
-    for index, shortcut in enumerate(deleted):
-        if index == len(deleted) - 1:
-            delim = '.\n'
-        print(shortcut, end=delim)
-    print()
+    print(outputs.delete_msg(deleted))
 
 
 @db_connect
@@ -84,22 +79,17 @@ def show(arguments, datapath, db_cursor=None):
             (shortcut, ))
         for row in selection:
             name, source, destinations = row[0], row[1], row[2]
-            print(f'NAME: {name}\n'
-                  f'  SOURCE:\n    {source}\n'
-                  f'  DESTINATIONS:\n    {destinations}\n')
-
+            print(outputs.show_msg(name, source, destinations))
+            
 
 @db_connect
 def showall(arguments, datapath, db_cursor=None):
     selection = db_cursor.execute(
         '''SELECT name FROM shortcuts ORDER BY name''')
-    print('SAVED NAMES:')
-    for row in selection:
-        print('\t' + row[0])
-    print()
+    print(outputs.showall_msg([row[0] for row in selection]))
 
 
 @db_connect
 def clear(arguments, datapath, db_cursor=None):
     db_cursor.execute('''DROP TABLE IF EXISTS shortcuts''')
-    print('Database is cleared.')
+    print(outputs.clear_msg())
