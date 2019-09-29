@@ -21,7 +21,6 @@ cloud storages or external hard drives.
 ## Commands:
 Command          | Description
 -----------------|------------------------------------
-help             | get documentation
 create           | create a shortcut
 delete           | delete a shortcut
 update           | change shortcut's source and/or destination paths

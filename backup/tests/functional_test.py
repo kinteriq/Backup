@@ -70,11 +70,11 @@ class TestCommandLine(unittest.TestCase):
     def tearDown(self):
         os.remove(PATH)
 
-    # User enters empty command and sees error message
+    # User enters empty command and sees app documentation
     def test_receive_empty_command(self):
         with self.assertRaises(SystemExit) as e:
             patched_read_from_command_line(args=NO_ARGS, path=PATH)
-            self.assertEqual(e.exception.code, outputs.ERROR_MSG['empty'])
+            self.assertEqual(e.exception.code, outputs.COMMANDS_INFO)
 
     # User enters help command
     def test_receive_help_command(self):

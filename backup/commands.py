@@ -66,8 +66,6 @@ COMMANDS = {
 
 def read_from_command_line(datapath) -> list:
     args = sys.argv[1:]  # exclude 'backup.py'
-    if 'help' in args:
-        raise SystemExit(outputs.COMMANDS_INFO)
     valid_args = check.CommandLine(datapath=datapath,
                                    arguments=args,
                                    all_commands=COMMANDS).complete()

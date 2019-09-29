@@ -18,7 +18,7 @@ import os
 import sqlite3
 
 from database import db_connect
-from outputs import ERROR_MSG
+from outputs import ERROR_MSG, COMMANDS_INFO
 
 
 class Path:
@@ -68,7 +68,7 @@ class CommandLine:
 
     def empty(self):
         if not self.arguments:
-            raise SystemExit(ERROR_MSG['empty'])
+            raise SystemExit(COMMANDS_INFO)
 
     def backup_args(self):
         """

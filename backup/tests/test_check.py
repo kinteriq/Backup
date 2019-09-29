@@ -18,7 +18,7 @@ class TestCommandLineComplete:
             check.CommandLine(datapath=PATH,
                               arguments=[],
                               all_commands=COMMANDS).complete()
-        assert e.exconly().endswith(outputs.ERROR_MSG['empty'])
+        assert outputs.COMMANDS_INFO.rstrip() in e.exconly()
 
     @staticmethod
     # TODO refactor

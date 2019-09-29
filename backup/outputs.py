@@ -2,13 +2,12 @@ import commands
 
 
 ERROR_MSG = {
-    'invalid_cmd': lambda cmd: f'No such command: "{cmd}". Try "help".',
-    'invalid_cmd_args': 'Invalid command arguments. Try "help".',
-    'empty': 'Zero arguments provided. Try "help".',
+    'invalid_cmd': lambda cmd: f'No such command: "{cmd}".',
+    'invalid_cmd_args': 'Invalid command arguments.',
     'invalid_shortcut': lambda s: f'No such shortcut saved: "{s}".',
     'created_shortcut_exists':
     'Shortcut is already in the database. Try "update" command.',
-    'no_data': 'No shortcuts saved. Try "create" or "help" command.',
+    'no_data': 'No shortcuts saved. Try "create" command.',
     'wrong_path': lambda dir: f'Directory does not exist:\n\t"{dir}".',
 }
 
