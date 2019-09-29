@@ -6,15 +6,25 @@
 Makes day-to-day backups easier if you are using desktop
 cloud storages or external hard drives.
 
-
 #### Example:
-
 
 ###### _create a shortcut for later use:_
         python3 backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
 
 ###### _backup the content of ~/Documents/ to both ~/cloud_1/docs/ and ~/cloud_2/docs/:_
         python3 backup.py documents
+
+---
+
+## Requirements:
+- MacOS/Linux;
+- python3.6 or later;
+
+#### No installation required:
+Use alias to create your name for the app.
+Edit __~/.bash_profile__ (MacOS) or __~/.bashrc__ (Linux):
+
+        alias your_name='python3 /your_full_path/backup/backup/backup.py'
 
 ---
 
