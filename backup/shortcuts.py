@@ -53,7 +53,7 @@ def update(arguments, datapath, db_cursor=None):
                               tuple(checked_destinations))
         if source or destinations:
             updated.append(shortcut)
-    print(outputs.update_msg(updated_lst=updated))
+            print(outputs.update_msg(updated_lst=updated))
 
 
 @db_connect

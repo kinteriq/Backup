@@ -32,7 +32,7 @@ def db_connect(func):   # TODO @db_connect(datapath)
     Manages the connection with the database, which is in the 'datapath' file.
     """
     @functools.wraps(func)
-    def wrapper(datapath, args=tuple()):
+    def wrapper(datapath, args=tuple()):    # TODO *args
         connection = sqlite3.connect(datapath)
         cursor = connection.cursor()
         result = func(args, datapath=datapath, db_cursor=cursor)

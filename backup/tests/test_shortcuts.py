@@ -34,21 +34,26 @@ def test_wrong_path_name(empty_db_cursor, PATH):
 
 
 def test_shortcut_is_created(empty_db_cursor, PATH):
-    shortcuts.create(args=CREATE_ARGS, datapath=PATH)
-    selection = empty_db_cursor.execute('''SELECT * FROM shortcuts''')
     expected_result = tuple(CREATE_ARGS[:2] + [', '.join(CREATE_ARGS[2:])])
-    for row in selection:
-        assert expected_result == row
-
-
-def test_update_shortcut(monkeypatch, empty_db_cursor, PATH):
     shortcuts.create(args=CREATE_ARGS, datapath=PATH)
-    with mock.patch('builtins.input', side_effect=['', ANOTHER_DESTINATION]):
-        shortcuts.update(args=[CREATE_ARGS[0]], datapath=PATH)
     selection = empty_db_cursor.execute('''SELECT * FROM shortcuts''')
-    expected_result = tuple(CREATE_ARGS[:2] + [ANOTHER_DESTINATION])
     for row in selection:
         assert expected_result == row
+
+
+def test_update_shortcuts(monkeypatch, empty_db_cursor, PATH):
+    expected_output = outputs.update_msg(updated_lst=[NAME, ANOTHER_NAME])
+    expected_db_change = [tuple(CREATE_ARGS[1:]), tuple(ANOTHER_CREATE_ARGS[1:])]
+    shortcuts.create(args=CREATE_ARGS, datapath=PATH)
+    shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=PATH)
+    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
+        with mock.patch('builtins.input', side_effect=[
+                '', ANOTHER_DESTINATION, '', DESTINATION]):
+            shortcuts.update(args=[NAME, ANOTHER_NAME], datapath=PATH)
+        assert mock_output.getvalue().rstrip().endswith(expected_output)
+    selection = empty_db_cursor.execute('''SELECT * FROM shortcuts''')
+    for row in selection:
+        assert row[1:] in expected_db_change
 
 
 def test_delete_shortcut(empty_db_cursor, PATH):

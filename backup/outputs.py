@@ -2,14 +2,14 @@ import commands
 
 
 ERROR_MSG = {
-    'invalid_cmd': lambda cmd: f'No such command (try "help"): {cmd}',
+    'invalid_cmd': lambda cmd: f'No such command: "{cmd}". Try "help".',
     'invalid_cmd_args': 'Invalid command arguments. Try "help".',
     'empty': 'Zero arguments provided. Try "help".',
-    'invalid_shortcut': lambda s: f'No such shortcut saved: {s}',
+    'invalid_shortcut': lambda s: f'No such shortcut saved: "{s}".',
     'created_shortcut_exists':
     'Shortcut is already in the database. Try "update" command.',
     'no_data': 'No shortcuts saved. Try "create" or "help" command.',
-    'wrong_path': lambda dir: f'Directory does not exist:\n\t{dir}',
+    'wrong_path': lambda dir: f'Directory does not exist:\n\t"{dir}".',
 }
 
 COMMANDS_INFO = commands.__doc__
@@ -32,7 +32,7 @@ def update_msg(shortcut=None, updated_lst=[]):
 
 
 def delete_msg(deleted_lst):
-    d_string = '\n'.join(deleted_lst)
+    d_string = ', '.join(deleted_lst)
     num = len(deleted_lst)
     return f'Deleted successfully {num} shortcut(s): {d_string}.'
 

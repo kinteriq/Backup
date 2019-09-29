@@ -24,7 +24,7 @@ COMMANDS:
         delete NAME [ NAME-2 ] ...
     
     ::change shortcut's source and/or destination paths::
-        update NAME
+        update NAME [ NAME-2 ] ...
 
     ::fetch shortcut's source and destination paths::
         show NAME [ NAME-2 ] ...
@@ -32,7 +32,7 @@ COMMANDS:
     ::fetch all shortcuts::
         showall
 
-    ::do a backup::
+    ::backup::
         NAME
         
     ::delete all shortcuts::
@@ -79,7 +79,7 @@ def execute_command(command, params, datapath):
         try:
             copyrun.call(shortcuts=params, path=datapath)
             raise SystemExit(outputs.PROGRAM_END)
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:           # TODO add cleanup
             raise SystemExit(outputs.PROGRAM_QUIT)
         except EOFError:
             raise SystemExit(outputs.PROGRAM_QUIT)

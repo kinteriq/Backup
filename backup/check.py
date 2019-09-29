@@ -102,8 +102,9 @@ class _Validate:
                                                                 datapath=data)
         if len(args) >= 4 else False,
         'update':
-        lambda args, data: _Validate.shortcut(args=args[1], datapath=data)
-        if len(args) == 2 else False,
+        lambda args, data: all([
+            _Validate.shortcut(args=arg, datapath=data) for arg in args[1:]
+        ]),
         'delete':
         lambda args, data: any([
             len(args) >= 2,
