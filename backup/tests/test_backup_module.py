@@ -2,19 +2,17 @@ import os
 import sys
 import sqlite3
 
-from .fixtures import PATH
-from backup import backup
-import pytest
+import backup
 
 
-def test_main_module_creates_shortcut(monkeypatch, PATH):
+def test_main_module_creates_shortcut(monkeypatch, DB_PATH):
     expanded_path = os.path.expanduser('~/')
     expected_result = ('abc', expanded_path, expanded_path)
     monkeypatch.setattr(sys, 'argv',
                         ('backup.py', 'create', 'abc', '~/', '~/'))
 
-    backup.main(PATH)
-    table = sqlite3.connect(PATH).cursor().execute('SELECT * FROM shortcuts')
+    backup.main(DB_PATH)
+    table = sqlite3.connect(DB_PATH).cursor().execute('SELECT * FROM shortcuts')
     
     assert table.fetchall()[0] == expected_result
 

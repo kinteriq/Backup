@@ -33,11 +33,12 @@ def call(shortcuts, path):
     for shortcut in shortcuts:
         selection = con.cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
-        try:
-            _copy_manager(selection)
-        except OSError as e:
-            con.close()
-            raise SystemExit(e)
+        # try:
+        #     _copy_manager(selection)
+        # except OSError as e:
+        #     con.close()
+        #     raise SystemExit(e)
+        _copy_manager(selection)
     con.close()
 
 
@@ -47,6 +48,7 @@ def _copy_manager(table):
         destinations = row[2].split(', ')
         for d in destinations:
             _copy(source, d)
+    # TODO add check equality
 
 
 def _copy(source, destination):

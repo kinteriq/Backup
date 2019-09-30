@@ -1,5 +1,35 @@
-import commands
+COMMANDS_INFO = """
+COMMANDS:
 
+    ::create a shortcut::
+        create NAME PATH_FROM PATH_TO_1 [ PATH_TO_2 ] ...
+
+    ::delete shortcuts::
+        delete NAME [ NAME-2 ] ...
+    
+    ::change shortcut's source and/or destination paths::
+        update NAME [ NAME-2 ] ...
+
+    ::fetch shortcut's source and destination paths::
+        show NAME [ NAME-2 ] ...
+
+    ::fetch all shortcuts::
+        showall
+
+    ::backup::
+        NAME
+        
+    ::delete all shortcuts::
+        clear
+
+EXAMPLE:
+
+    ::create a shortcut for later use::
+            python3 backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
+
+    ::backup the content of ~/Documents/ to both ~/cloud_1/docs/ and ~/cloud_2/docs/::
+            python3 backup.py documents
+"""
 
 ERROR_MSG = {
     'invalid_cmd': lambda cmd: f'No such command: "{cmd}".',
@@ -11,7 +41,6 @@ ERROR_MSG = {
     'wrong_path': lambda dir: f'Directory does not exist:\n\t"{dir}".',
 }
 
-COMMANDS_INFO = commands.__doc__
 PROGRAM_END = '====\nDONE.'
 PROGRAM_QUIT = '\n=======\nEXIT...'
 
