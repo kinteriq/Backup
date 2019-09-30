@@ -14,6 +14,7 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 import shutil
 import sqlite3
@@ -33,12 +34,11 @@ def call(shortcuts, path):
     for shortcut in shortcuts:
         selection = con.cursor().execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
-        # try:
-        #     _copy_manager(selection)
-        # except OSError as e:
-        #     con.close()
-        #     raise SystemExit(e)
-        _copy_manager(selection)
+        try:
+            _copy_manager(selection)
+        except OSError as e:
+            con.close()
+            raise SystemExit(e)
     con.close()
 
 
