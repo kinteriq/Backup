@@ -76,7 +76,7 @@ def _copy(source, destination):
 
 def _perm_to_replace(file):
     ask = input(f'''\nFile already exists:
-    "{file}"\n\nReplace (y/all/nothing)? ''')
+    "{file}"\nReplace (y/all/nothing)? ''')
     if ask == 'all':
         PERMISSIONS['replace_all'] = True
     elif ask == 'nothing':
@@ -84,3 +84,5 @@ def _perm_to_replace(file):
         PERMISSIONS['replace_nothing'] = True
     elif ask != 'y':
         PERMISSIONS['replace_one'] = False
+    else:
+        PERMISSIONS['replace_one'] = True
