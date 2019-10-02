@@ -43,40 +43,45 @@ class CreateCmd:
 
 
 class ShowCmd(CreateCmd):
-    def __init__(self):
-        super().__init__(cmd='show')
+    def __init__(self, *args, **kwargs):
+        super(ShowCmd, self).__init__(*args, **kwargs)
+        self.cmd = 'show'
 
     def args(self):
         return ['backup.py', self.cmd, self.name]
 
 
 class UpdateCmd(CreateCmd):
-    def __init__(self):
-        super().__init__(cmd='update')
+    def __init__(self, *args, **kwargs):
+        super(UpdateCmd, self).__init__(*args, **kwargs)
+        self.cmd = 'update'
 
     def args(self):
         return ['backup.py', self.cmd, self.name]
 
 
 class ShowallCmd(CreateCmd):
-    def __init__(self):
-        super().__init__(cmd='showall')
+    def __init__(self, *args, **kwargs):
+        super(ShowallCmd, self).__init__(*args, **kwargs)
+        self.cmd = 'showall'
     
     def args(self):
         return ['backup.py', self.cmd]
 
 
 class RunbackupCmd(CreateCmd):
-    def __init__(self):
-        super().__init__(cmd=CreateCmd().name)
+    def __init__(self, *args, **kwargs):
+        super(RunbackupCmd, self).__init__(*args, **kwargs)
+        self.cmd = self.name
     
     def args(self):
         return ['backup.py', self.name]
 
 
 class DeleteCmd(CreateCmd):
-    def __init__(self):
-        super().__init__(cmd='delete')
+    def __init__(self, *args, **kwargs):
+        super(DeleteCmd, self).__init__(*args, **kwargs)
+        self.cmd = 'delete'
     
     def args(self):
         return ['backup.py', self.cmd, self.name]

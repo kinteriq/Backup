@@ -98,7 +98,7 @@ class TestCommandLine(unittest.TestCase):
 
         self.assertEqual(get_table_raw(('SELECT * FROM shortcuts',))[2],
                                        DB['another_destination']),\
-            'Update cmd does not execute correctly'
+            f'{CREATED_1.name} was not updated in db'
 
     # User creates another shortcut and checks that they are both saved
     #   with 'showall' command
