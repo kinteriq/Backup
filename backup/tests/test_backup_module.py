@@ -3,31 +3,20 @@ import sys
 import sqlite3
 
 import backup
+from constants import CreateCmd
 
 
-def test_main_module_creates_shortcut(monkeypatch, DB_PATH):
-    expanded_path = os.path.expanduser('~/')
-    expected_result = ('abc', expanded_path, expanded_path)
-    monkeypatch.setattr(sys, 'argv',
-                        ('backup.py', 'create', 'abc', '~/', '~/'))
-
+def test_main_module_does_not_raise_exception(monkeypatch, DB_PATH):
+    created = CreateCmd()
+    monkeypatch.setattr(sys, 'argv', created.args())
     backup.main(DB_PATH)
     table = sqlite3.connect(DB_PATH).cursor().execute('SELECT * FROM shortcuts')
-    
-    assert table.fetchall()[0] == expected_result
+    assert table.fetchall()[0] == created.db_content(),\
+        'Database content does not equal received args'
 
 
-def test_main_module_pass_sqlite3_operational_error(monkeypatch):
-    expanded_path = os.path.expanduser('~/')
-    expected_result = ('abc', expanded_path, expanded_path)
-    monkeypatch.setattr(sys, 'argv',
-                        ('backup.py', 'create', 'abc', '~/', '~/'))
-    path = os.path.join(os.getcwd(), 'testing_pass_error.db')
-    with open(path, 'w'):
+def test_main_module_pass_db_exists_operational_error(monkeypatch, DB_PATH):
+    with open(DB_PATH, 'w'):
         pass
-
-    backup.main(path)
-    table = sqlite3.connect(path).cursor().execute('SELECT * FROM shortcuts')
-
-    assert table.fetchall()[0] == expected_result
-    os.remove(path)
+    monkeypatch.setattr(sys, 'argv',  CreateCmd().args())
+    assert backup.main(DB_PATH) is None, 'Did not pass db exists error'

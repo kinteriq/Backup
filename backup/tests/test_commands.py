@@ -4,43 +4,50 @@ import sys
 
 from commands import read_from_command_line, execute_command
 import outputs
-from constants import DB, SHORTCUT_NAMES
+from constants import (DB, SHORTCUT_NAMES, CreateCmd, ShowallCmd,
+                       RunbackupCmd)
 
 
 def test_got_empty_line(monkeypatch, DB_PATH):
     monkeypatch.setattr(sys, 'argv', [])
     with pytest.raises(SystemExit) as e:
         read_from_command_line(datapath=DB_PATH)
-    assert outputs.COMMANDS_INFO.rstrip() in e.exconly()
+    assert outputs.COMMANDS_INFO.rstrip() in e.exconly(),\
+        'Documentation is not in the output'
 
 
 def test_got_invalid_command(monkeypatch, mock_fields_db):
-    name = 'wrongNAME'
-    monkeypatch.setattr(sys, 'argv', ['backup.py', name])
+    inst = CreateCmd(cmd='wrongNAME')
+    monkeypatch.setattr(sys, 'argv', inst.args())
     with pytest.raises(SystemExit) as e:
         read_from_command_line(datapath=mock_fields_db)
-    assert outputs.ERROR_MSG['invalid_cmd'](name) in e.exconly()
+    assert outputs.ERROR_MSG['invalid_cmd'](inst.cmd) in e.exconly(),\
+        'Wrong invalid cmd error message'
 
 
 def test_got_showall_command(monkeypatch, mock_fields_db):
-    monkeypatch.setattr(sys, 'argv', ['backup.py', 'showall'])
-    assert read_from_command_line(datapath=mock_fields_db) == ('showall', )
+    monkeypatch.setattr(sys, 'argv', ShowallCmd().args())
+    result = read_from_command_line(datapath=mock_fields_db)
+    assert result == ('showall', ),\
+        'read_from_command_line() did not return showall args'
 
 
 def test_got_a_shortcut(monkeypatch, mock_fields_db):
-    monkeypatch.setattr(sys, 'argv', ['backup.py'] + list(SHORTCUT_NAMES))
+    monkeypatch.setattr(sys, 'argv', RunbackupCmd().args())
     command, *params = read_from_command_line(datapath=mock_fields_db)
-    assert (command, params) == (None, SHORTCUT_NAMES)
+    assert (command, params) == (None, [RunbackupCmd().name]),\
+        'read_from_command_line() did not return runbackup args'
 
 
-def test_got_valid_command(monkeypatch, mock_fields_db):
-    monkeypatch.setattr(sys, 'argv',
-        ['backup.py', 'create', 'NAME', DB['source'], DB['destination']])
-    result = read_from_command_line(datapath=mock_fields_db)
-    assert result == ('create', 'NAME', DB['source'], DB['destination'])
+def test_got_valid_command(monkeypatch, empty_db_cursor, DB_PATH):
+    monkeypatch.setattr(sys, 'argv', CreateCmd().args())
+    result = read_from_command_line(datapath=DB_PATH)
+    assert result == tuple(CreateCmd().args()[1:]),\
+        'read_from_command_line() did not return valid create args'
 
 
-def test_execute_create_command(mock_fields_db):
-    command, *params = ['create', 'NAME', DB['source'], DB['destination']]
+def test_execute_create_command(empty_db_cursor, DB_PATH):
+    command, *params = CreateCmd().args()[1:]
     assert execute_command(command=command, params=params,
-                           datapath=mock_fields_db) is None
+                           datapath=DB_PATH) is None,\
+        'execute_command did not execute correctly'

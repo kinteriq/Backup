@@ -3,7 +3,7 @@ import os
 import shutil
 import sqlite3
 
-from constants import SHORTCUT_NAMES, DB
+from constants import SHORTCUT_NAMES, DB, DESTINATIONS
 
 
 @pytest.fixture
@@ -43,7 +43,8 @@ def DB_PATH():
 
 @pytest.fixture(autouse=True)
 def rm_destination_dir():
-    try:
-        shutil.rmtree(DB['destination'])
-    except FileNotFoundError:
-        pass
+    for dst in DESTINATIONS:
+        try:
+            shutil.rmtree(dst)
+        except FileNotFoundError:
+            pass
