@@ -85,3 +85,12 @@ class DeleteCmd(CreateCmd):
     
     def args(self):
         return ['backup.py', self.cmd, self.name]
+
+
+class ClearCmd(CreateCmd):
+    def __init__(self, *args, **kwargs):
+        super(ClearCmd, self).__init__(*args, **kwargs)
+        self.cmd = 'clear'
+    
+    def args(self):
+        return ['backup.py', self.cmd]

@@ -4,118 +4,130 @@ import os
 import check
 import commands
 import outputs
-from constants import SHORTCUT_NAMES, CreateCmd, ShowCmd, ShowallCmd
+from constants import (SHORTCUT_NAMES, CreateCmd, ShowCmd,
+                       ShowallCmd, DeleteCmd, UpdateCmd,
+                       ClearCmd)
 
 
-# TODO add all commands tests
 COMMANDS = commands.COMMANDS
 
 
-@pytest.mark.runbackup
-@pytest.mark.check_complete
-def test_check_valid_backup_args(mock_fields_db, DB_PATH):
-    """
-    If all shortcuts are valid - returns a tuple with valid args,
-        where the first arg is None, and the rest - shortcut names.
-    """
-    result = check.CommandLine(datapath=DB_PATH,
-                               arguments=SHORTCUT_NAMES,
-                               all_commands=COMMANDS)
-    assert result.complete() == (None, *SHORTCUT_NAMES),\
-        'Complete check returned incorrect args'
+VALID_WITH_MOCK_DB = [
+    ShowCmd().args()[1:],
+    ShowallCmd().args()[1:],
+    UpdateCmd().args()[1:],
+    DeleteCmd().args()[1:],
+    ClearCmd().args()[1:],
+]
 
 
-@pytest.mark.create
-@pytest.mark.check_complete
-def test_valid_command(empty_db_cursor, DB_PATH):
-    """
-    Test a function returns a tuple with valid args
-        upon receiving a valid command
-    """
-    result = check.CommandLine(datapath=DB_PATH,
-                               arguments=CreateCmd().args()[1:],
-                               all_commands=COMMANDS)
-    assert result.complete() == tuple(CreateCmd().args()[1:]),\
-        'Complete check returned incorrect args'
+INVALID_WITH_MOCK_DB = [
+    (ShowCmd(name='wr0ng').args()[1:], 'invalid_shortcut', 'wr0ng'),
+    (CreateCmd().args()[1:], 'created_shortcut_exists', None),
+    (DeleteCmd(name='wr0ng').args()[1:], 'no_such_shortcut_saved', 'wr0ng'),
+    (UpdateCmd(name='wr0ng').args()[1:], 'no_such_shortcut_saved', 'wr0ng'),
+]
 
 
-@pytest.mark.check_complete
-def test_check_invalid_cmd_name(empty_db_cursor, DB_PATH):
+INVALID_WITH_EMPTY_DB = [
+    (CreateCmd(cmd='wr0ng').args()[1:], 'invalid_cmd', 'wr0ng'),
+    (ShowallCmd().args()[1:], 'no_data', None),
+    (CreateCmd().args()[1:3], 'invalid_cmd_args', None),
+
+]
+
+
+def valid_cmd(db, args):
+    return check.CommandLine(datapath=db,
+                             arguments=args,
+                             all_commands=COMMANDS)
+
+    
+def raise_exit_cmd(db, args):
     with pytest.raises(SystemExit) as e:
-        check.CommandLine(datapath=DB_PATH,
-                          arguments=CreateCmd(cmd='wr0ng').args()[1:],
+        check.CommandLine(datapath=db,
+                          arguments=args,
                           all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(outputs.ERROR_MSG['invalid_cmd']('wr0ng')),\
-        'Missing invalid_cmd error message'
+    return e
 
 
-@pytest.mark.show
-@pytest.mark.check_complete
-def test_invalid_show_command_shortcut(mock_fields_db):
-    with pytest.raises(SystemExit) as e:
-        check.CommandLine(datapath=mock_fields_db,
-                          arguments= ShowCmd(name='wr0ng').args()[1:],
-                          all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(
-        outputs.ERROR_MSG['invalid_shortcut']('wr0ng')),\
-        'Missing invalid_shortcut error message'
-
-
-@pytest.mark.showall
-@pytest.mark.check_complete
-def test_try_showall_with_no_db(DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        result = check.CommandLine(datapath=DB_PATH,
-                                   arguments=ShowallCmd().args()[1:],
-                                   all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(outputs.ERROR_MSG['no_data']),\
-        'Missing no_data error message'
-
-
-@pytest.mark.showall
-@pytest.mark.check_complete
-def test_try_showall_with_no_shortcuts_saved(empty_db_cursor, DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        result = check.CommandLine(datapath=DB_PATH,
-                                   arguments=['showall'],
-                                   all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(outputs.ERROR_MSG['no_data']),\
-        'Missing no_data error message'
-
-
-@pytest.mark.doc
+@pytest.mark.commands
 @pytest.mark.check_complete
 def test_check_documentation_output(empty_db_cursor, DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        check.CommandLine(datapath=DB_PATH,
-                          arguments=[],
-                          all_commands=COMMANDS).complete()
+    e = raise_exit_cmd(DB_PATH, [])
     assert outputs.COMMANDS_INFO.rstrip() in e.exconly(),\
         'Missing documentation output'
 
 
-@pytest.mark.create
+@pytest.mark.commands
 @pytest.mark.check_complete
-def test_not_enough_create_command_args(empty_db_cursor, DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        check.CommandLine(datapath=DB_PATH,
-                          arguments=CreateCmd().args()[1:3],
-                          all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(
-        outputs.ERROR_MSG['invalid_cmd_args']),\
-        'Missing invalid_cmd_args error message'
+def test_valid_create_command(empty_db_cursor, DB_PATH):
+    """
+    Test a function returns a tuple with valid args
+        upon receiving a valid command
+    """
+    result = valid_cmd(DB_PATH, CreateCmd().args()[1:])
+    assert result.complete() == tuple(CreateCmd().args()[1:]),\
+        'Create cmd complete check returned incorrect args'
 
 
-@pytest.mark.create
+@pytest.mark.commands
 @pytest.mark.check_complete
-def test_created_shortcut_exists(mock_fields_db, DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        check.CommandLine(datapath=DB_PATH,
-                          arguments=CreateCmd().args()[1:],
-                          all_commands=COMMANDS).complete()
-    assert e.exconly().endswith(
-        outputs.ERROR_MSG['created_shortcut_exists']),\
-        'Missing created_shortcut_exists error message'
+@pytest.mark.parametrize('args', VALID_WITH_MOCK_DB)
+def test_valid_commands(mock_fields_db, args):
+    """
+    Test a function returns a tuple with valid args
+        upon receiving a valid command
+    """
+    result = valid_cmd(mock_fields_db, args)
+    assert result.complete() == tuple(args),\
+        'Complete check returned incorrect args'
+
+
+@pytest.mark.commands
+@pytest.mark.check_complete
+def test_check_valid_backup_args(mock_fields_db):
+    """
+    If all shortcuts are valid - returns a tuple with valid args,
+        where the first arg is None, and the rest - shortcut names.
+    """
+    result = valid_cmd(mock_fields_db, SHORTCUT_NAMES)
+    assert result.complete() == (None, *SHORTCUT_NAMES),\
+        'Runbackup check returned incorrect args'
+
+
+@pytest.mark.commands
+@pytest.mark.check_complete
+@pytest.mark.parametrize('args, error, param', INVALID_WITH_MOCK_DB)
+def test_invalid_commands(mock_fields_db, args, error, param):
+    e = raise_exit_cmd(mock_fields_db, args)
+    try:
+        assert e.exconly().endswith(
+            outputs.ERROR_MSG[error](param)), f'Missing {error} error message'
+    except TypeError:
+        assert e.exconly().endswith(
+            outputs.ERROR_MSG[error]), f'Missing {error} error message'
+
+
+@pytest.mark.commands
+@pytest.mark.check_complete
+@pytest.mark.parametrize('args, error, param', INVALID_WITH_EMPTY_DB)
+def test_invalid_commands(empty_db_cursor, DB_PATH, args, error, param):
+    e = raise_exit_cmd(DB_PATH, args)
+    try:
+        assert e.exconly().endswith(
+            outputs.ERROR_MSG[error](param)), f'Missing {error} error message'
+    except TypeError:
+        assert e.exconly().endswith(
+            outputs.ERROR_MSG[error]), f'Missing {error} error message'
+
+
+@pytest.mark.commands
+@pytest.mark.check_complete
+def test_try_showall_with_no_db(DB_PATH):
+    e = raise_exit_cmd(DB_PATH, ShowallCmd().args()[1:])
+    assert e.exconly().endswith(outputs.ERROR_MSG['no_data']),\
+        'Missing no_data error message'
 
 
 @pytest.mark.check_path
