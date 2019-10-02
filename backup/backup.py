@@ -17,7 +17,7 @@
 
 import sqlite3
 
-from commands import read_from_command_line, execute_command
+from commands import execute_command
 import config
 import database
 
@@ -27,8 +27,7 @@ def main(datapath):
         database.db_creator(datapath)
     except sqlite3.OperationalError:    # db exists
         pass
-    command, *params = read_from_command_line(datapath=datapath)
-    execute_command(command=command, params=params, datapath=datapath)
+    execute_command(datapath=datapath)
 
 
 if __name__ == '__main__':

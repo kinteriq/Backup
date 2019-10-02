@@ -49,6 +49,9 @@ class CommandLine:
         self.arguments = arguments
         self.commands = all_commands
 
+    def __repr__(self):
+        return f'<CommandLine> : data={self.data}, args={self.arguments}'
+
     def complete(self):
         """
         Performs all checks in the class.

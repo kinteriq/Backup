@@ -33,15 +33,11 @@ COMMANDS = {
 }
 
 
-def read_from_command_line(datapath) -> list:
-    args = sys.argv[1:]  # exclude 'backup.py'
-    valid_args = check.CommandLine(datapath=datapath,
-                                   arguments=args,
-                                   all_commands=COMMANDS).complete()
-    return valid_args
-
-
-def execute_command(command, params, datapath):
+def execute_command(datapath):
+    command, *params = check.CommandLine(
+        datapath=datapath,
+        arguments=sys.argv[1:],  # exclude 'backup.py'
+        all_commands=COMMANDS).complete()
     if not command:
         try:
             copyrun.call(shortcuts=params, path=datapath)

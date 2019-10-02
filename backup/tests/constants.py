@@ -94,3 +94,12 @@ class ClearCmd(CreateCmd):
     
     def args(self):
         return ['backup.py', self.cmd]
+
+
+VALID_ARGS_WITH_MOCK_DB = [
+    ShowCmd().args(),
+    ShowallCmd().args(),
+    UpdateCmd().args(),
+    DeleteCmd().args(),
+    ClearCmd().args(),
+]

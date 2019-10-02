@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 import outputs
-from commands import read_from_command_line, execute_command
+from commands import execute_command
 from tests.constants import (PATH, SHORTCUT_NAMES, DB, CreateCmd, 
                              ShowCmd, UpdateCmd, ShowallCmd, RunbackupCmd,
                              DeleteCmd)
@@ -19,12 +19,6 @@ CREATED_2 = CreateCmd(name=SHORTCUT_NAMES[1],
                       destination=DB['third_destination'])
 
 
-def patched_read_from_command_line(args, path):
-    with patch.object(sys, 'argv', args):
-        valid_args = read_from_command_line(path)
-        return valid_args
-
-
 def cmd_execution_output_check(args):
     with patch('sys.stdout', new=StringIO()) as mock_output:
         cmd_execution(args)
@@ -32,8 +26,8 @@ def cmd_execution_output_check(args):
 
 
 def cmd_execution(args):
-    cmd, *params = patched_read_from_command_line(args=args, path=PATH)
-    execute_command(command=cmd, params=params, datapath=PATH)
+    with patch.object(sys, 'argv', args):
+        execute_command(datapath=PATH)
 
 
 def get_table_raw(cmd):
@@ -56,7 +50,7 @@ class TestCommandLine(unittest.TestCase):
     # User enters empty command and sees app documentation
     def test_receive_empty_command(self):
         with self.assertRaises(SystemExit) as e:
-            patched_read_from_command_line(args=['backup.py'], path=PATH)
+            cmd_execution(args=['backup.py'])
         self.assertEqual(e.exception.code, outputs.COMMANDS_INFO),\
             'Documentation is not in the output'
 
@@ -65,7 +59,7 @@ class TestCommandLine(unittest.TestCase):
         inst = CreateCmd(cmd='wr0ng')
         expected_output = outputs.ERROR_MSG['invalid_cmd'](inst.cmd)
         with self.assertRaises(SystemExit) as e:
-            patched_read_from_command_line(args=inst.args(), path=PATH)
+            cmd_execution(args=inst.args())
         self.assertEqual(e.exception.code, expected_output),\
             'Wrong invalid cmd message or no msg at all'
 
@@ -86,7 +80,7 @@ class TestCommandLine(unittest.TestCase):
 
     # Sees that the destination path is wrong;
     #   Changes the destination path
-    @patch('builtins.input', side_effect=['', DB['another_destination']])
+    @patch('builtins.input', side_effect=['', DB['third_destination']])
     def test_receive_update_command(self, user_input):
         expected = set(outputs.update_msg(shortcut=CREATED_1.name,
             updated_lst=[CREATED_1.name]).split('\n'))
@@ -97,7 +91,7 @@ class TestCommandLine(unittest.TestCase):
             'Update cmd does not execute correctly'
 
         self.assertEqual(get_table_raw(('SELECT * FROM shortcuts',))[2],
-                                       DB['another_destination']),\
+                                       DB['third_destination']),\
             f'{CREATED_1.name} was not updated in db'
 
     # User creates another shortcut and checks that they are both saved
@@ -113,10 +107,8 @@ class TestCommandLine(unittest.TestCase):
     # Enters the correct shortcut's name
     def test_runbackup_command(self):
         cmd_execution(CREATED_1.args())
-        command, *params = patched_read_from_command_line(
-            args=RunbackupCmd().args(), path=PATH)
         with self.assertRaises(SystemExit) as e:
-            execute_command(command=command, params=params, datapath=PATH)
+            cmd_execution(args=RunbackupCmd().args())
         self.assertEqual(e.exception.code, outputs.PROGRAM_END),\
             'Runbackup cmd does not execute correctly'
 

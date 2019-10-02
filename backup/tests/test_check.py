@@ -5,20 +5,11 @@ import check
 import commands
 import outputs
 from constants import (SHORTCUT_NAMES, CreateCmd, ShowCmd,
-                       ShowallCmd, DeleteCmd, UpdateCmd,
-                       ClearCmd)
+                       VALID_ARGS_WITH_MOCK_DB, ShowallCmd, DeleteCmd,
+                       UpdateCmd, ClearCmd)
 
 
 COMMANDS = commands.COMMANDS
-
-
-VALID_WITH_MOCK_DB = [
-    ShowCmd().args()[1:],
-    ShowallCmd().args()[1:],
-    UpdateCmd().args()[1:],
-    DeleteCmd().args()[1:],
-    ClearCmd().args()[1:],
-]
 
 
 INVALID_WITH_MOCK_DB = [
@@ -73,14 +64,14 @@ def test_valid_create_command(empty_db_cursor, DB_PATH):
 
 @pytest.mark.commands
 @pytest.mark.check_complete
-@pytest.mark.parametrize('args', VALID_WITH_MOCK_DB)
+@pytest.mark.parametrize('args', VALID_ARGS_WITH_MOCK_DB)
 def test_valid_commands(mock_fields_db, args):
     """
     Test a function returns a tuple with valid args
         upon receiving a valid command
     """
-    result = valid_cmd(mock_fields_db, args)
-    assert result.complete() == tuple(args),\
+    result = valid_cmd(mock_fields_db, args[1:])
+    assert result.complete() == tuple(args[1:]),\
         'Complete check returned incorrect args'
 
 
