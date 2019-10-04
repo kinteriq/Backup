@@ -38,12 +38,12 @@ def execute_command(datapath):
         datapath=datapath,
         arguments=sys.argv[1:],  # exclude 'backup.py'
         all_commands=COMMANDS).complete()
-    if not command:
-        try:
+    try:
+        if not command:
             copyrun.call(shortcuts=params, path=datapath)
             raise SystemExit(outputs.PROGRAM_END)
-        except KeyboardInterrupt:           # TODO add cleanup
+        COMMANDS[command](args=params, datapath=datapath)
+    except KeyboardInterrupt:           # TODO add cleanup
             raise SystemExit(outputs.PROGRAM_QUIT)
-        except EOFError:
-            raise SystemExit(outputs.PROGRAM_QUIT)
-    COMMANDS[command](args=params, datapath=datapath)
+    except EOFError:
+        raise SystemExit(outputs.PROGRAM_QUIT)
