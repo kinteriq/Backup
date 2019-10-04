@@ -14,32 +14,47 @@ DESTINATIONS = [
     os.path.join(_up_level_dir, 'testBackup3')
 ]
 
+# DB = {
+#     'path': PATH,
+#     'name': SHORTCUT_NAMES[0],
+#     'second_name': SHORTCUT_NAMES[1],
+#     'source': os.path.dirname(__file__),
+#     'destination': DESTINATIONS[0],
+#     'another_destination': DESTINATIONS[1],
+#     'third_destination': DESTINATIONS[2]
+# }
+
 DB = {
-    'name': SHORTCUT_NAMES[0],
-    'source': os.path.dirname(__file__),
-    'destination': DESTINATIONS[0],
-    'another_destination': DESTINATIONS[1],
-    'third_destination': DESTINATIONS[2]
+   'path': PATH,
+   'row_1': {
+       'name': SHORTCUT_NAMES[0],
+       'source': os.path.dirname(__file__),
+       'destinations': DESTINATIONS[:2],
+   },
+   'row_2': {
+       'name': SHORTCUT_NAMES[1],
+       'source': os.path.dirname(__file__),
+       'destinations': DESTINATIONS[2:],
+   }
 }
 
 
 class CreateCmd:
-    def __init__(self, cmd='create', name=DB['name'],
-                 source=DB['source'], destination=DB['destination'],
-                 another_destination=DB['another_destination']):
+    def __init__(self, cmd='create', name=DB['row_1']['name'],
+                 source=DB['row_1']['source'],
+                 destinations=DB['row_1']['destinations']):
         self.cmd = cmd
         self.name = name
         self.source = source
-        self.destination = destination
-        self.destination_2 = another_destination
+        self.destinations = destinations
     
     def args(self):
-        return ['backup.py', self.cmd, self.name, self.source,
-                self.destination, self.destination_2]
+        
+        return ['backup.py', self.cmd, self.name, self.source]\
+            + self.destinations
 
     def db_content(self):
-        return (self.name, self.source,
-                f'{self.destination}, {self.destination_2}')
+        return (self.name, self.source, ', '.join(self.destinations))
 
 
 class ShowCmd(CreateCmd):
@@ -103,3 +118,7 @@ VALID_ARGS_WITH_MOCK_DB = [
     DeleteCmd().args(),
     ClearCmd().args(),
 ]
+
+
+CREATE_1 = CreateCmd(**DB['row_1'])
+CREATE_2 = CreateCmd(**DB['row_2'])

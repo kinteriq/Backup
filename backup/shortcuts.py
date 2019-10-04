@@ -39,21 +39,23 @@ def update(arguments, datapath, db_cursor=None):
     updated = []
     for shortcut in arguments:
         print(outputs.update_msg(shortcut))
-        source = input('- Source ["enter" to skip]:\n')
+        source = input('\t- Source ["enter" to skip]:\n')
         destinations = input(
-            '- Destinations ["enter" to skip]:\n'
-            '*use commas to separate: /user/docs/, /user/temps/\n')
+            '\t- Destinations ["enter" to skip]:\n'
+            '\t*use commas to separate: /user/docs/, /user/temps/\n')
         if source:
             checked_source = check.Path.single(source)
-            db_cursor.execute('''UPDATE shortcuts SET source = ?''',
-                              (checked_source, ))
+            db_cursor.execute('''UPDATE shortcuts SET source = ?
+                WHERE name = ?''', (checked_source, shortcut))
         if destinations:
-            checked_destinations = check.Path.many(destinations.split(','))
-            db_cursor.execute('''UPDATE shortcuts SET destinations = ?''',
-                              tuple(checked_destinations))
+            checked_destinations = check.Path.many(destinations.split(', '))
+            db_cursor.execute('''UPDATE shortcuts SET destinations = ?
+                WHERE name = ?''', (', '.join(checked_destinations), shortcut))
+
         if source or destinations:
             updated.append(shortcut)
-            print(outputs.update_msg(updated_lst=updated))
+    
+    print(outputs.update_msg(updated_lst=updated))
 
 
 @db_connect

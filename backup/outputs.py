@@ -67,10 +67,8 @@ def create_msg(shortcut):
 
 
 def update_msg(shortcut=None, updated_lst=[]):
-    start = f'Update "{shortcut}"\n'
-    end = f'''Successfully updated: {', '.join(updated_lst)}.'''
-    if shortcut and updated_lst:
-        return start + end
+    start = f'\nUpdate "{shortcut}":\n'
+    end = f"\nSuccessfully updated: {', '.join(updated_lst)}."
     if shortcut:
         return start
     return end

@@ -4,9 +4,9 @@ import os
 import check
 import commands
 import outputs
-from constants import (SHORTCUT_NAMES, CreateCmd, ShowCmd,
-                       VALID_ARGS_WITH_MOCK_DB, ShowallCmd, DeleteCmd,
-                       UpdateCmd, ClearCmd)
+from constants import (SHORTCUT_NAMES, VALID_ARGS_WITH_MOCK_DB,
+                       CreateCmd, ShowCmd, ShowallCmd, DeleteCmd,
+                       UpdateCmd)
 
 
 COMMANDS = commands.COMMANDS

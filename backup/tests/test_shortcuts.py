@@ -6,94 +6,162 @@ from unittest import mock
 
 import shortcuts
 import outputs
-from constants import SHORTCUT_NAMES, DB
+from constants import CREATE_1, CREATE_2
+from commands import COMMANDS
 
 
-CREATE_ARGS = [SHORTCUT_NAMES[0], DB['source'], 
-               DB['destination'], DB['another_destination']]
-
-ANOTHER_CREATE_ARGS = [SHORTCUT_NAMES[1], DB['source'], 
-                       DB['destination']]
-
-
-def test_wrong_path_name(empty_db_cursor, DB_PATH):
-    with pytest.raises(SystemExit) as e:
-        shortcuts.create(args=[SHORTCUT_NAMES[0], 'wrong_path'],
-                         datapath=DB_PATH)
-    assert 'Directory does not exist' in e.exconly()
+def execute(cmd, args, db):
+    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
+        COMMANDS[cmd](args=args, datapath=db)
+    return mock_output.getvalue().rstrip()
 
 
+@pytest.mark.commands
+@pytest.mark.create
 def test_shortcut_is_created(empty_db_cursor, DB_PATH):
-    expected_result = tuple(CREATE_ARGS[:2] + [', '.join(CREATE_ARGS[2:])])
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
+    expected_result = (CREATE_1.name, CREATE_1.source,
+                       ', '.join(CREATE_1.destinations))
+    output = execute('create', CREATE_1.args()[2:], DB_PATH)
+
     selection = empty_db_cursor.execute('''SELECT * FROM shortcuts''')
-    for row in selection:
-        assert expected_result == row
+    assert selection.fetchone() == expected_result,\
+        'Shortcut was not created'
+
+    assert output == outputs.create_msg(CREATE_1.name),\
+        'Incorrect output for "create" cmd'
 
 
-def test_update_shortcuts(monkeypatch, empty_db_cursor, DB_PATH):
-    expected_output = outputs.update_msg(updated_lst=SHORTCUT_NAMES)
-    expected_db_change = [tuple(CREATE_ARGS[1:]),
-                          tuple(ANOTHER_CREATE_ARGS[1:])]
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
-    shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=DB_PATH)
+@pytest.mark.commands
+@pytest.mark.update
+def test_update_wrong_source(monkeypatch, mock_fields_db, mock_fields_db_cursor):
+    with pytest.raises(SystemExit) as e:
+        with mock.patch('builtins.input', side_effect=['wr0ng', '']):
+            execute('update', [CREATE_1.name], mock_fields_db)
 
-    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
-        with mock.patch('builtins.input', side_effect=[
-                '', DB['another_destination'], '', DB['destination']]):
-            shortcuts.update(args=SHORTCUT_NAMES, datapath=DB_PATH)
-    assert mock_output.getvalue().rstrip().endswith(expected_output)
+    assert e.value.args[0] == outputs.ERROR_MSG['wrong_path']('wr0ng'),\
+        'Incorrect output for non-existent updated source path'
+
+
+@pytest.mark.commands
+@pytest.mark.update
+def test_update_wrong_destination(monkeypatch, mock_fields_db, mock_fields_db_cursor):
+    with pytest.raises(SystemExit) as e:
+        with mock.patch('builtins.input', side_effect=['', 'wr0ng/']):
+            execute('update', [CREATE_1.name], mock_fields_db)
+
+    assert e.value.args[0] == outputs.ERROR_MSG['wrong_path']('wr0ng'),\
+        'Incorrect output for non-existent updated destination path'
+
+
+@pytest.mark.commands
+@pytest.mark.update
+def test_update_one_shortcut(monkeypatch, mock_fields_db, mock_fields_db_cursor):
+    expected_output = outputs.update_msg(updated_lst=[CREATE_1.name])
+    expected_db_change = [
+        (CREATE_1.name, CREATE_1.source, ', '.join(CREATE_2.destinations)),
+        (CREATE_2.name, CREATE_2.source, ', '.join(CREATE_2.destinations))
+    ]
+
+    with mock.patch('builtins.input', side_effect=[
+        '',
+        ', '.join(CREATE_2.destinations)
+    ]):
+        output = execute('update', [CREATE_1.name], mock_fields_db)
     
-    selection = empty_db_cursor.execute('''SELECT * FROM shortcuts''')
-    for row in selection:
-        assert row[1:] in expected_db_change
+    selection = mock_fields_db_cursor.execute('''SELECT * FROM shortcuts''')
+    assert selection.fetchall() == expected_db_change,\
+        'Shortcut was not updated'
+    
+    assert output.endswith(expected_output),\
+        'Incorrect output for "update" cmd'
 
 
-def test_delete_shortcut(empty_db_cursor, DB_PATH):
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
-    shortcuts.delete(args=[CREATE_ARGS[0]],
-                     datapath=DB_PATH)
-    selection = empty_db_cursor.execute(
-        '''SELECT * FROM shortcuts WHERE name = ?''', (CREATE_ARGS[0], ))
-    assert selection.fetchall() == []
+@pytest.mark.commands
+@pytest.mark.update
+def test_update_many_shortcuts(monkeypatch, mock_fields_db, mock_fields_db_cursor):
+    expected_output = outputs.update_msg(
+        updated_lst=[CREATE_1.name, CREATE_2.name])
+    expected_db_change = [
+        (CREATE_1.name, CREATE_1.source, ', '.join(CREATE_2.destinations)),
+        (CREATE_2.name, CREATE_2.source, ', '.join(CREATE_1.destinations))
+    ]
+
+    with mock.patch('builtins.input', side_effect=[
+        '',
+        ', '.join(CREATE_2.destinations),
+        '',
+        ', '.join(CREATE_1.destinations)
+    ]):
+        output = execute('update', [CREATE_1.name, CREATE_2.name],
+                         mock_fields_db)
+    
+    selection = mock_fields_db_cursor.execute('''SELECT * FROM shortcuts''')
+    assert selection.fetchall() == expected_db_change,\
+        'Shortcuts were not updated'
+    
+    assert output.endswith(expected_output),\
+        'Incorrect output for "update" cmd'
 
 
-def test_delete_many_shortcuts(empty_db_cursor, DB_PATH):
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
-    shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=DB_PATH)
-    shortcuts.delete(args=SHORTCUT_NAMES, datapath=DB_PATH)
-    for name in SHORTCUT_NAMES:
-        selection = empty_db_cursor.execute(
+@pytest.mark.commands
+@pytest.mark.delete
+def test_delete_one_shortcut_out_of_many(mock_fields_db, mock_fields_db_cursor):
+    output = execute('delete', [CREATE_1.name], mock_fields_db)
+
+    selection = mock_fields_db_cursor.execute('''SELECT * FROM shortcuts''')
+    assert selection.fetchall() == [tuple(CREATE_2.args()[2:])],\
+        'Both shortcuts were deleted istead of one'
+    
+    assert output == outputs.delete_msg([CREATE_1.name]),\
+        'Incorrect output for "delete" cmd'
+
+
+@pytest.mark.commands
+@pytest.mark.delete
+def test_delete_all_shortcuts(mock_fields_db, mock_fields_db_cursor):
+    args = [CREATE_1.name, CREATE_2.name]
+    output = execute('delete', args, mock_fields_db)
+
+    for name in args:
+        selection = mock_fields_db_cursor.execute(
             '''SELECT * FROM shortcuts WHERE name = ?''', (name, ))
-        assert selection.fetchall() == []
+        assert selection.fetchall() == [],\
+            'One or more shortcuts was not deleted'
+    
+    assert output == outputs.delete_msg(args),\
+        'Incorrect output for "delete" cmd'
 
 
-def test_show_shortcut(empty_db_cursor, DB_PATH):
-    destinations = ', '.join(CREATE_ARGS[2:])
-    expected_output = outputs.show_msg(CREATE_ARGS[0],
-        CREATE_ARGS[1], destinations)
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
-    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
-        shortcuts.show(args=[CREATE_ARGS[0]], datapath=DB_PATH)
-    assert mock_output.getvalue().rstrip() == expected_output
+@pytest.mark.commands
+@pytest.mark.show
+def test_show_shortcut(mock_fields_db):
+    expected = outputs.show_msg(CREATE_1.name, CREATE_1.source,
+                                ', '.join(CREATE_1.destinations))
+    output = execute('show', [CREATE_1.name], mock_fields_db)
+    assert output == expected,\
+        'Incorrect output for "show" cmd'
 
 
-def test_showall(empty_db_cursor, DB_PATH):
-    expected_output = outputs.showall_msg(SHORTCUT_NAMES)
-    shortcuts.create(args=CREATE_ARGS, datapath=DB_PATH)
-    shortcuts.create(args=ANOTHER_CREATE_ARGS, datapath=DB_PATH)
-    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
-        shortcuts.showall(args=[], datapath=DB_PATH)
-    assert mock_output.getvalue().rstrip() == expected_output
+@pytest.mark.commands
+@pytest.mark.showall
+def test_showall(mock_fields_db):
+    expected = outputs.showall_msg([CREATE_1.name, CREATE_2.name])
+    output = execute('showall', [], mock_fields_db)
+    assert output == expected,\
+        'Incorrect output for "showall" cmd'
 
 
-def test_clear(mock_fields_db):
-    expected_output = outputs.clear_msg()
-    with mock.patch('sys.stdout', new=StringIO()) as mock_output:
-        shortcuts.clear(args=['clear'], datapath=mock_fields_db)
-        with pytest.raises(sqlite3.OperationalError) as e:
-            connection = sqlite3.connect(mock_fields_db)
-            cursor = connection.cursor()
-            selection = cursor.execute('SELECT * FROM shortcuts')
-        assert 'no such table: shortcuts' in e.exconly()
-    assert mock_output.getvalue().rstrip() == expected_output
+@pytest.mark.commands
+@pytest.mark.clear
+@pytest.mark.db_content
+def test_clear(mock_fields_db, mock_fields_db_cursor):
+    output = execute('clear', CREATE_1.args()[1:], mock_fields_db)
+    
+    with pytest.raises(sqlite3.OperationalError) as e:
+        selection = mock_fields_db_cursor.execute('SELECT * FROM shortcuts')
+    assert e.value.args[0] == 'no such table: shortcuts',\
+        'Table "shortcuts" was not deleted'
+    
+    assert output == outputs.clear_msg(),\
+        'Incorrect output for "clear" cmd'
+    
