@@ -98,4 +98,4 @@ def clear_msg():
 
 
 def copying(source, destination):
-    return f'Copying:\n\t{source}\n\t-->{destination}'
+    return f'Copying:\n\t{source}\n\t--> {destination}'

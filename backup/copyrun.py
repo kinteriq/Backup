@@ -51,9 +51,15 @@ def _copy_manager(table):
     # TODO add check equality
 
 
+# TODO refactor
 def _copy(source, destination):
     if not os.path.exists(destination):
         os.mkdir(destination)
+    if os.path.isfile(source):
+        print(outputs.copying(source, destination))
+        shutil.copyfile(source, os.path.join(destination, 
+                                             os.path.split(source)[1]))
+        return True
     for file in os.listdir(source):
         path = os.path.join(source, file)
         if os.path.isdir(path):
@@ -72,6 +78,7 @@ def _copy(source, destination):
                     continue
             print(outputs.copying(path, destination_file))
             shutil.copyfile(path, destination_file)
+    return True
 
 
 def _perm_to_replace(file):

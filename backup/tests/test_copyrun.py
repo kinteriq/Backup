@@ -48,5 +48,5 @@ def _transfer_files():
                                         file)
             else:
                 filepath = os.path.join(CREATE_1.destinations[0], file)
-            transferred_files.add('-->' + filepath)
+            transferred_files.add(filepath)
     return transferred_files
