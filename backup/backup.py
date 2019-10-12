@@ -23,10 +23,7 @@ import database
 
 
 def main(datapath):
-    try:
-        database.db_creator(datapath)
-    except sqlite3.OperationalError:    # db exists
-        pass
+    database.db_creator(datapath)
     execute_command(datapath=datapath)
 
 

@@ -22,7 +22,7 @@ import sqlite3
 def db_creator(datapath):
     connection = sqlite3.connect(datapath)
     cursor = connection.cursor()
-    cursor.execute('''CREATE TABLE shortcuts
+    cursor.execute('''CREATE TABLE IF NOT EXISTS shortcuts
         (name TEXT PRIMARY KEY, source TEXT, destinations TEXT)''')
     connection.commit()
     connection.close()
