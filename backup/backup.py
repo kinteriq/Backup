@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 #     Backup is a tool which makes day-to-day backups easier.
 #
 #     Copyright (C) 2019  kinteriq
@@ -14,8 +16,6 @@
 #
 #     You should have received a copy of the GNU General Public License
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import sqlite3
 
 from commands import execute_command
 import config
