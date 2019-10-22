@@ -42,10 +42,10 @@ COMMANDS:
 EXAMPLE:
 
     ::create a shortcut for later use::
-            python3 backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
+            backup.py create documents ~/Documents/ ~/cloud_1/docs/ ~/cloud_2/docs/
 
     ::backup the content of ~/Documents/ to both ~/cloud_1/docs/ and ~/cloud_2/docs/::
-            python3 backup.py documents
+            backup.py documents
 """
 
 ERROR_MSG = {
