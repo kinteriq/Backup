@@ -53,9 +53,11 @@ ERROR_MSG = {
     'invalid_cmd_args': 'Invalid command arguments.',
     'invalid_shortcut': lambda s: f'No such shortcut saved: "{s}".',
     'created_shortcut_exists':
-    'Shortcut is already in the database. Try "update" command.',
+        'Shortcut is already in the database. Try "update" command.',
     'no_data': 'No shortcuts saved. Try "create" command.',
     'wrong_path': lambda dir: f'Directory does not exist:\n\t"{dir}".',
+    'wrong_custom_datapath':
+        'Wrong database path. Check <custom_datapath> inside config.py.'
 }
 
 PROGRAM_END = '====\nDONE.'

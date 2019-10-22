@@ -16,10 +16,14 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import functools
+import os
+import outputs
 import sqlite3
 
 
 def db_creator(datapath):
+    if not os.path.exists(os.path.split(datapath)[0]):
+        raise SystemExit(outputs.ERROR_MSG['wrong_custom_datapath'])
     connection = sqlite3.connect(datapath)
     cursor = connection.cursor()
     cursor.execute('''CREATE TABLE IF NOT EXISTS shortcuts
