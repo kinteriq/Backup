@@ -23,10 +23,10 @@ import outputs
 
 
 PERMISSIONS = {
-        'replace_all': False,
-        'replace_nothing': False,
-        'replace_one': True,
-    }
+    'replace_all': False,
+    'replace_nothing': False,
+    'replace_one': True,
+}
 
 
 def call(shortcuts, path):

@@ -103,7 +103,7 @@ class _Validate:
     cmd_args = {
         'create':
         lambda args, data: not _Validate.created_shortcut_exists(args=args[1],
-                                                                datapath=data)
+                                                                 datapath=data)
         if len(args) >= 4 else False,
         'update':
         lambda args, data: all([

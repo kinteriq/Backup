@@ -54,7 +54,7 @@ def update(arguments, datapath, db_cursor=None):
 
         if source or destinations:
             updated.append(shortcut)
-    
+
     print(outputs.update_msg(updated_lst=updated))
 
 
@@ -63,11 +63,11 @@ def delete(arguments, datapath, db_cursor=None):
     deleted = []
     for shortcut in arguments:
         select_shortcut = db_cursor.execute(
-            f'''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
+            '''SELECT * FROM shortcuts WHERE name = ?''', (shortcut, ))
         found_shortcut = select_shortcut.fetchone()
         if found_shortcut is None:
             continue
-        db_cursor.execute(f'''DELETE FROM shortcuts WHERE name = ?''',
+        db_cursor.execute('''DELETE FROM shortcuts WHERE name = ?''',
                           (shortcut, ))
         deleted.append(shortcut)
     print(outputs.delete_msg(deleted))
@@ -82,7 +82,7 @@ def show(arguments, datapath, db_cursor=None):
         for row in selection:
             name, source, destinations = row[0], row[1], row[2]
             print(outputs.show_msg(name, source, destinations))
-            
+
 
 @db_connect
 def showall(arguments, datapath, db_cursor=None):
