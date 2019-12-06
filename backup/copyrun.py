@@ -74,8 +74,8 @@ def _copy(source, destination):
                     pass
                 else:
                     _perm_to_replace(destination_file)
-                if not PERMISSIONS['replace_one']:
-                    continue
+                    if not PERMISSIONS['replace_one']:
+                        continue
             print(outputs.copying(path, destination_file))
             shutil.copyfile(path, destination_file)
     return True
